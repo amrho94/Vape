@@ -953,9 +953,15 @@ components = {
 		local optionapi = {
 			Type = 'Dropdown',
 			Value = optionsettings.List[1] or 'None',
-			Index = 0
+			Index = 0,
+			Open = false
 		}
-		
+
+		local openTween = TweenInfo.new(0.22, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+		local closeTween = TweenInfo.new(0.18, Enum.EasingStyle.Exponential, Enum.EasingDirection.In)
+		local optionTween = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		local animToken = 0
+
 		local dropdown = Instance.new('TextButton')
 		dropdown.Name = optionsettings.Name..'Dropdown'
 		dropdown.Size = UDim2.new(1, 0, 0, 40)
@@ -963,27 +969,33 @@ components = {
 		dropdown.BorderSizePixel = 0
 		dropdown.AutoButtonColor = false
 		dropdown.Visible = optionsettings.Visible == nil or optionsettings.Visible
+		dropdown.ClipsDescendants = true
 		dropdown.Text = ''
 		dropdown.Parent = children
 		addTooltip(dropdown, optionsettings.Tooltip or optionsettings.Name)
+
 		local bkg = Instance.new('Frame')
 		bkg.Name = 'BKG'
 		bkg.Size = UDim2.new(1, -20, 1, -9)
 		bkg.Position = UDim2.fromOffset(10, 4)
 		bkg.BackgroundColor3 = color.Light(uipallet.Main, 0.034)
+		bkg.ClipsDescendants = true
 		bkg.Parent = dropdown
 		addCorner(bkg, UDim.new(0, 6))
+
 		local button = Instance.new('TextButton')
 		button.Name = 'Dropdown'
 		button.Size = UDim2.new(1, -2, 1, -2)
 		button.Position = UDim2.fromOffset(1, 1)
 		button.BackgroundColor3 = uipallet.Main
 		button.AutoButtonColor = false
+		button.ClipsDescendants = true
 		button.Text = ''
 		button.Parent = bkg
+
 		local title = Instance.new('TextLabel')
 		title.Name = 'Title'
-		title.Size = UDim2.new(1, 0, 0, 29)
+		title.Size = UDim2.new(1, -26, 0, 29)
 		title.BackgroundTransparency = 1
 		title.Text = '         '..optionsettings.Name..' - '..optionapi.Value
 		title.TextXAlignment = Enum.TextXAlignment.Left
@@ -993,6 +1005,7 @@ components = {
 		title.FontFace = uipallet.Font
 		title.Parent = button
 		addCorner(button, UDim.new(0, 6))
+
 		local arrow = Instance.new('ImageLabel')
 		arrow.Name = 'Arrow'
 		arrow.Size = UDim2.fromOffset(4, 8)
@@ -1002,84 +1015,148 @@ components = {
 		arrow.ImageColor3 = Color3.fromRGB(140, 140, 140)
 		arrow.Rotation = 90
 		arrow.Parent = button
+
 		optionsettings.Function = optionsettings.Function or function() end
 		local dropdownchildren
-		
+
+		local function closeDropdown(noFunction)
+			if not dropdownchildren then
+				optionapi.Open = false
+				tween:Tween(dropdown, closeTween, {Size = UDim2.new(1, 0, 0, 40)})
+				tween:Tween(arrow, closeTween, {Rotation = 90})
+				return
+			end
+
+			animToken += 1
+			local token = animToken
+			optionapi.Open = false
+			tween:Tween(dropdown, closeTween, {Size = UDim2.new(1, 0, 0, 40)})
+			tween:Tween(arrow, closeTween, {Rotation = 90})
+
+			for _, obj in dropdownchildren:GetChildren() do
+				if obj:IsA('TextButton') then
+					tween:Tween(obj, closeTween, {
+						BackgroundTransparency = 1,
+						TextTransparency = 1,
+						Position = obj.Position + UDim2.fromOffset(0, 4)
+					})
+				end
+			end
+
+			task.delay(0.18, function()
+				if token == animToken and dropdownchildren then
+					dropdownchildren:Destroy()
+					dropdownchildren = nil
+				end
+			end)
+		end
+
+		local function openDropdown()
+			if dropdownchildren then return end
+			animToken += 1
+			local token = animToken
+			optionapi.Open = true
+
+			local optionCount = math.max(#optionsettings.List - 1, 0)
+			local openHeight = 40 + (optionCount * 26)
+			tween:Tween(dropdown, openTween, {Size = UDim2.new(1, 0, 0, openHeight)})
+			tween:Tween(arrow, openTween, {Rotation = 270})
+
+			dropdownchildren = Instance.new('Frame')
+			dropdownchildren.Name = 'Children'
+			dropdownchildren.Size = UDim2.new(1, 0, 0, optionCount * 26)
+			dropdownchildren.Position = UDim2.fromOffset(0, 27)
+			dropdownchildren.BackgroundTransparency = 1
+			dropdownchildren.ClipsDescendants = true
+			dropdownchildren.Parent = button
+
+			local ind = 0
+			for _, v in optionsettings.List do
+				if v == optionapi.Value then continue end
+
+				local dropdownoption = Instance.new('TextButton')
+				dropdownoption.Name = v..'Option'
+				dropdownoption.Size = UDim2.new(1, 0, 0, 26)
+				dropdownoption.Position = UDim2.fromOffset(0, ind * 26 + 5)
+				dropdownoption.BackgroundColor3 = uipallet.Main
+				dropdownoption.BackgroundTransparency = 1
+				dropdownoption.BorderSizePixel = 0
+				dropdownoption.AutoButtonColor = false
+				dropdownoption.Text = '         '..v
+				dropdownoption.TextXAlignment = Enum.TextXAlignment.Left
+				dropdownoption.TextColor3 = color.Dark(uipallet.Text, 0.16)
+				dropdownoption.TextTransparency = 1
+				dropdownoption.TextSize = 13
+				dropdownoption.TextTruncate = Enum.TextTruncate.AtEnd
+				dropdownoption.FontFace = uipallet.Font
+				dropdownoption.Parent = dropdownchildren
+
+				local targetPosition = UDim2.fromOffset(0, ind * 26)
+				task.delay(math.min(ind * 0.018, 0.09), function()
+					if token == animToken and dropdownoption.Parent then
+						tween:Tween(dropdownoption, optionTween, {
+							BackgroundTransparency = 0,
+							TextTransparency = 0,
+							Position = targetPosition
+						})
+					end
+				end)
+
+				dropdownoption.MouseEnter:Connect(function()
+					tween:Tween(dropdownoption, uipallet.Tween, {
+						BackgroundColor3 = color.Light(uipallet.Main, 0.02)
+					})
+				end)
+				dropdownoption.MouseLeave:Connect(function()
+					tween:Tween(dropdownoption, uipallet.Tween, {
+						BackgroundColor3 = uipallet.Main
+					})
+				end)
+				dropdownoption.MouseButton1Click:Connect(function()
+					optionapi:SetValue(v, true)
+				end)
+
+				ind += 1
+			end
+		end
+
 		function optionapi:Save(tab)
 			tab[optionsettings.Name] = {Value = self.Value}
 		end
-		
+
 		function optionapi:Load(tab)
 			if self.Value ~= tab.Value then
 				self:SetValue(tab.Value)
 			end
 		end
-		
+
 		function optionapi:Change(list)
 			optionsettings.List = list or {}
+			if dropdownchildren then
+				closeDropdown(true)
+			end
 			if not table.find(optionsettings.List, self.Value) then
 				self:SetValue(self.Value)
 			end
 		end
-		
+
 		function optionapi:SetValue(val, mouse)
 			self.Value = table.find(optionsettings.List, val) and val or optionsettings.List[1] or 'None'
 			title.Text = '         '..optionsettings.Name..' - '..self.Value
 			if dropdownchildren then
-				arrow.Rotation = 90
-				dropdownchildren:Destroy()
-				dropdownchildren = nil
-				dropdown.Size = UDim2.new(1, 0, 0, 40)
+				closeDropdown(true)
 			end
 			optionsettings.Function(self.Value, mouse)
 		end
-		
+
 		button.MouseButton1Click:Connect(function()
-			if not dropdownchildren then
-				arrow.Rotation = 270
-				dropdown.Size = UDim2.new(1, 0, 0, 40 + (#optionsettings.List - 1) * 26)
-				dropdownchildren = Instance.new('Frame')
-				dropdownchildren.Name = 'Children'
-				dropdownchildren.Size = UDim2.new(1, 0, 0, (#optionsettings.List - 1) * 26)
-				dropdownchildren.Position = UDim2.fromOffset(0, 27)
-				dropdownchildren.BackgroundTransparency = 1
-				dropdownchildren.Parent = button
-				local ind = 0
-				for _, v in optionsettings.List do
-					if v == optionapi.Value then continue end
-					local dropdownoption = Instance.new('TextButton')
-					dropdownoption.Name = v..'Option'
-					dropdownoption.Size = UDim2.new(1, 0, 0, 26)
-					dropdownoption.Position = UDim2.fromOffset(0, ind * 26)
-					dropdownoption.BackgroundColor3 = uipallet.Main
-					dropdownoption.BorderSizePixel = 0
-					dropdownoption.AutoButtonColor = false
-					dropdownoption.Text = '         '..v
-					dropdownoption.TextXAlignment = Enum.TextXAlignment.Left
-					dropdownoption.TextColor3 = color.Dark(uipallet.Text, 0.16)
-					dropdownoption.TextSize = 13
-					dropdownoption.TextTruncate = Enum.TextTruncate.AtEnd
-					dropdownoption.FontFace = uipallet.Font
-					dropdownoption.Parent = dropdownchildren
-					dropdownoption.MouseEnter:Connect(function()
-						tween:Tween(dropdownoption, uipallet.Tween, {
-							BackgroundColor3 = color.Light(uipallet.Main, 0.02)
-						})
-					end)
-					dropdownoption.MouseLeave:Connect(function()
-						tween:Tween(dropdownoption, uipallet.Tween, {
-							BackgroundColor3 = uipallet.Main
-						})
-					end)
-					dropdownoption.MouseButton1Click:Connect(function()
-						optionapi:SetValue(v, true)
-					end)
-					ind += 1
-				end
+			if dropdownchildren then
+				closeDropdown(true)
 			else
-				optionapi:SetValue(optionapi.Value, true)
+				openDropdown()
 			end
 		end)
+
 		dropdown.MouseEnter:Connect(function()
 			tween:Tween(bkg, uipallet.Tween, {
 				BackgroundColor3 = color.Light(uipallet.Main, 0.0875)
@@ -1090,10 +1167,10 @@ components = {
 				BackgroundColor3 = color.Light(uipallet.Main, 0.034)
 			})
 		end)
-		
+
 		optionapi.Object = dropdown
 		api.Options[optionsettings.Name] = optionapi
-		
+
 		return optionapi
 	end,
 	Font = function(optionsettings, children, api)
@@ -4008,11 +4085,34 @@ function mainapi:CreateCategory(categorysettings)
 		return moduleapi
 	end
 
+	local expandTween
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded
-		children.Visible = self.Expanded
-		arrow.Rotation = self.Expanded and 0 or 180
-		window.Size = UDim2.fromOffset(220, self.Expanded and math.min(41 + windowlist.AbsoluteContentSize.Y / scale.Scale, 601) or 41)
+		if expandTween then
+			pcall(function() expandTween:Cancel() end)
+		end
+		if self.Expanded then
+			children.Visible = true
+			children.Size = UDim2.new(1, 0, 0, -41)
+			expandTween = tween:Tween(children, TweenInfo.new(0.42, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+				Size = UDim2.new(1, 0, 1, -41)
+			})
+		else
+			expandTween = tween:Tween(children, TweenInfo.new(0.34, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
+				Size = UDim2.new(1, 0, 0, -41)
+			})
+			divider.Visible = false
+			task.delay(0.28, function()
+				children.Visible = self.Expanded
+				divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
+			end)
+		end
+		tween:Tween(arrow, TweenInfo.new(0.28, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+			Rotation = self.Expanded and 0 or 180
+		})
+		tween:Tween(window, TweenInfo.new(0.36, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+			Size = UDim2.fromOffset(220, self.Expanded and math.min(41 + windowlist.AbsoluteContentSize.Y / scale.Scale, 601) or 41)
+		})
 		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
 	end
 
@@ -4169,16 +4269,31 @@ function mainapi:CreateOverlay(categorysettings)
 	windowlist.Parent = children
 	addMaid(categoryapi)
 
+	local expandTween
 	function categoryapi:Expand(check)
 		if check and not blur.Visible then return end
 		self.Expanded = not self.Expanded
-		children.Visible = self.Expanded
 		dots.ImageColor3 = self.Expanded and uipallet.Text or color.Light(uipallet.Main, 0.37)
-		if self.Expanded then
-			window.Size = UDim2.fromOffset(window.Size.X.Offset, math.min(41 + windowlist.AbsoluteContentSize.Y / scale.Scale, 601))
-		else
-			window.Size = UDim2.fromOffset(window.Size.X.Offset, 41)
+		if expandTween then
+			pcall(function() expandTween:Cancel() end)
 		end
+		if self.Expanded then
+			children.Visible = true
+			children.Size = UDim2.new(1, 0, 0, -41)
+			expandTween = tween:Tween(children, TweenInfo.new(0.42, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+				Size = UDim2.new(1, 0, 1, -41)
+			})
+		else
+			expandTween = tween:Tween(children, TweenInfo.new(0.34, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
+				Size = UDim2.new(1, 0, 0, -41)
+			})
+			task.delay(0.28, function()
+				children.Visible = self.Expanded
+			end)
+		end
+		tween:Tween(window, TweenInfo.new(0.36, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+			Size = UDim2.fromOffset(window.Size.X.Offset, self.Expanded and math.min(41 + windowlist.AbsoluteContentSize.Y / scale.Scale, 601) or 41)
+		})
 	end
 
 	function categoryapi:Pin()
@@ -4798,11 +4913,35 @@ function mainapi:CreateCategoryList(categorysettings)
 		mainapi:UpdateGUI(mainapi.GUIColor.Hue, mainapi.GUIColor.Sat, mainapi.GUIColor.Value)
 	end
 
+	local expandTween
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded
-		children.Visible = self.Expanded
-		arrow.Rotation = self.Expanded and 0 or 180
-		window.Size = UDim2.fromOffset(220, self.Expanded and (categorysettings.Profiles and 342 or math.min(51 + windowlist.AbsoluteContentSize.Y / scale.Scale, 611)) or 45)
+		local fullHeight = categorysettings.Profiles and 342 or math.min(51 + windowlist.AbsoluteContentSize.Y / scale.Scale, 611)
+		if expandTween then
+			pcall(function() expandTween:Cancel() end)
+		end
+		if self.Expanded then
+			children.Visible = true
+			children.Size = UDim2.new(1, 0, 0, -45)
+			expandTween = tween:Tween(children, TweenInfo.new(0.42, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+				Size = UDim2.new(1, 0, 1, -45)
+			})
+		else
+			expandTween = tween:Tween(children, TweenInfo.new(0.34, Enum.EasingStyle.Exponential, Enum.EasingDirection.In), {
+				Size = UDim2.new(1, 0, 0, -45)
+			})
+			divider.Visible = false
+			task.delay(0.28, function()
+				children.Visible = self.Expanded
+				divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
+			end)
+		end
+		tween:Tween(arrow, TweenInfo.new(0.28, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+			Rotation = self.Expanded and 0 or 180
+		})
+		tween:Tween(window, TweenInfo.new(0.36, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+			Size = UDim2.fromOffset(220, self.Expanded and fullHeight or 45)
+		})
 		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
 	end
 
@@ -5861,9 +6000,10 @@ function mainapi:CreateLegit()
 		underline.AnchorPoint = Vector2.new(0.5, 0)
 		underline.BackgroundColor3 = legitTheme.Text
 		underline.BorderSizePixel = 0
-		underline.Visible = false
+		underline.BackgroundTransparency = 1
+		underline.Visible = true
 		underline.Parent = button
-		legitapi.Tabs[name] = {Button = button, Underline = underline}
+		legitapi.Tabs[name] = {Button = button, Underline = underline, UnderlineSize = underline.Size}
 		button.MouseButton1Click:Connect(function()
 			legitapi.CurrentTab = name
 			legitapi:UpdateTabs()
@@ -5941,20 +6081,75 @@ function mainapi:CreateLegit()
 	function legitapi:UpdateTabs()
 		for name, tab in self.Tabs do
 			local selected = self.CurrentTab == name
-			tab.Button.TextColor3 = selected and legitTheme.Text or legitTheme.Muted
-			tab.Underline.Visible = selected
+			tween:Tween(tab.Button, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				TextColor3 = selected and legitTheme.Text or legitTheme.Muted
+			})
+			tween:Tween(tab.Underline, TweenInfo.new(0.22, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+				BackgroundTransparency = selected and 0 or 1,
+				Size = selected and tab.UnderlineSize or UDim2.fromOffset(0, 1)
+			})
 		end
 	end
 
 	function legitapi:Filter()
+		self.FilterToken = (self.FilterToken or 0) + 1
+		local token = self.FilterToken
 		local query = (self.SearchText or ''):lower()
+		local showTween = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		local hideTween = TweenInfo.new(0.13, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
 		for _, v in self.Modules do
 			local tabOk = self.CurrentTab == 'ALL'
 				or (self.CurrentTab == 'FAVORITE' and v.Favorite)
 				or (self.CurrentTab ~= 'FAVORITE' and v.Tab == self.CurrentTab)
 			local searchOk = query == '' or v.Name:lower():find(query, 1, true) ~= nil
-			v.Object.Visible = tabOk and searchOk
+			local shouldShow = tabOk and searchOk
+			local visuals = v.Visuals
+
+			if shouldShow then
+				v.Object.Visible = true
+				v.Object.BackgroundTransparency = math.min(v.Object.BackgroundTransparency, 0.28)
+				tween:Tween(v.Object, showTween, {BackgroundTransparency = 0})
+				if visuals then
+					tween:Tween(visuals.Title, showTween, {TextTransparency = 0})
+					tween:Tween(visuals.Icon, showTween, {ImageTransparency = v.Enabled and 0 or 0.2})
+					tween:Tween(visuals.Dots, showTween, {ImageTransparency = 0})
+					tween:Tween(visuals.Knob, showTween, {BackgroundTransparency = 0})
+					tween:Tween(visuals.KnobMain, showTween, {BackgroundTransparency = 0})
+					tween:Tween(visuals.Stroke, showTween, {Transparency = v.Enabled and 0.45 or 0.85})
+				end
+			else
+				if v.Object.Visible then
+					tween:Tween(v.Object, hideTween, {BackgroundTransparency = 1})
+					if visuals then
+						tween:Tween(visuals.Title, hideTween, {TextTransparency = 1})
+						tween:Tween(visuals.Icon, hideTween, {ImageTransparency = 1})
+						tween:Tween(visuals.Dots, hideTween, {ImageTransparency = 1})
+						tween:Tween(visuals.Knob, hideTween, {BackgroundTransparency = 1})
+						tween:Tween(visuals.KnobMain, hideTween, {BackgroundTransparency = 1})
+						tween:Tween(visuals.Stroke, hideTween, {Transparency = 1})
+					end
+					task.delay(0.13, function()
+						if token == self.FilterToken and v.Object then
+							v.Object.Visible = false
+							v.Object.BackgroundTransparency = 0
+							if visuals then
+								visuals.Title.TextTransparency = 0
+								visuals.Icon.ImageTransparency = v.Enabled and 0 or 0.2
+								visuals.Dots.ImageTransparency = 0
+								visuals.Knob.BackgroundTransparency = 0
+								visuals.KnobMain.BackgroundTransparency = 0
+								visuals.Stroke.Transparency = v.Enabled and 0.45 or 0.85
+							end
+						end
+					end)
+				end
+			end
 		end
+
+		tween:Tween(children, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			CanvasPosition = Vector2.new(0, 0)
+		})
 	end
 
 	legitapi:UpdateTabs()
@@ -6137,6 +6332,15 @@ function mainapi:CreateLegit()
 		modulesettings.Function = modulesettings.Function or function() end
 		addMaid(moduleapi)
 
+		moduleapi.Visuals = {
+			Title = title,
+			Icon = moduleicon,
+			Dots = dots,
+			Knob = knob,
+			KnobMain = knobmain,
+			Stroke = modulestroke
+		}
+
 		function moduleapi:Toggle()
 			moduleapi.Enabled = not moduleapi.Enabled
 			if moduleapi.Children then
@@ -6187,12 +6391,12 @@ function mainapi:CreateLegit()
 		end)
 		module.MouseEnter:Connect(function()
 			if not moduleapi.Enabled then
-				tween:Tween(module, uipallet.Tween, {BackgroundColor3 = legitTheme.CardHover})
+				tween:Tween(module, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = legitTheme.CardHover})
 			end
 		end)
 		module.MouseLeave:Connect(function()
 			if not moduleapi.Enabled then
-				tween:Tween(module, uipallet.Tween, {BackgroundColor3 = legitTheme.Card})
+				tween:Tween(module, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = legitTheme.Card})
 			end
 		end)
 		module.MouseButton1Click:Connect(function()
