@@ -5005,8 +5005,34 @@ function mainapi:CreateCategoryList(categorysettings)
 			publicProfilesApi,
 			'http://amrho94.github.io/profiles.json',
 			'https://amrho94.github.io/profiles/profiles.json',
-			'https://amrho94.github.io/profiles.json'
+			'https://amrho94.github.io/profiles.json',
+			'https://raw.githubusercontent.com/amrho94/Vape/main/profiles/profiles.json',
+			'https://raw.githubusercontent.com/amrho94/Vape/main/profiles.json'
 		}
+
+		-- Compatibility layer based on the older OnlineProfiles code:
+		-- try executor request APIs first, then fall back to game:HttpGet.
+		local requestfunc = syn and syn.request
+			or http and http.request
+			or http_request
+			or fluxus and fluxus.request
+			or request
+
+		local function publicHttpGet(url)
+			local ok, result = pcall(function()
+				if requestfunc then
+					local response = requestfunc({
+						Url = url,
+						Method = 'GET'
+					})
+					return response and (response.Body or response.body)
+				end
+				return game:HttpGet(url, true)
+			end)
+			if ok and type(result) == 'string' and result ~= '' and not result:find('<!DOCTYPE', 1, true) and result ~= '404: Not Found' then
+				return result
+			end
+		end
 
 		local standaloneTheme = {
 			Base = Color3.fromRGB(18, 18, 20),
@@ -5271,23 +5297,52 @@ function mainapi:CreateCategoryList(categorysettings)
 			if type(raw) ~= 'table' then
 				return list
 			end
-			raw = raw.profiles or raw.Profiles or raw.data or raw
-			if raw[1] ~= nil then
-				for _, entry in raw do
-					if type(entry) == 'table' then
-						table.insert(list, entry)
+
+			-- Accept multiple API shapes:
+			-- {profiles = {...}}, {Profiles = {...}}, {data = {...}}, {onlineProfiles = {...}},
+			-- or a direct map like {Default = 'http://.../Default.json'}.
+			local source = raw.profiles or raw.Profiles or raw.data or raw.onlineProfiles or raw.OnlineProfiles or raw
+
+			local function normalizeEntry(name, entry)
+				if type(entry) == 'string' then
+					return {Name = tostring(name), Url = entry}
+				end
+				if type(entry) ~= 'table' then
+					return nil
+				end
+
+				local hasPayload = entry.Config or entry.config or entry.Data or entry.data
+				local hasUrl = entry.Url or entry.URL or entry.url or entry.RawUrl or entry.rawUrl or entry.File or entry.file
+				local hasMeta = entry.Name or entry.name or entry.Title or entry.title or entry.Author or entry.author or entry.Description or entry.description
+
+				-- The old profile system stores local profile metadata as {Keybind = '', Selected = true}.
+				-- That is not an online profile entry, so skip it unless it also has url/config/meta.
+				if (entry.Keybind ~= nil or entry.Selected ~= nil) and not hasPayload and not hasUrl and not hasMeta then
+					return nil
+				end
+
+				entry.Name = entry.Name or entry.name or entry.Title or entry.title or tostring(name)
+				entry.Author = entry.Author or entry.author or entry.Creator or entry.creator or 'Public profile'
+				entry.Description = entry.Description or entry.description or entry.Game or entry.game or entry.Author
+				return entry
+			end
+
+			if source[1] ~= nil then
+				for index, entry in source do
+					local normalized = normalizeEntry(index, entry)
+					if normalized then
+						table.insert(list, normalized)
 					end
 				end
 			else
-				for name, entry in raw do
-					if type(entry) == 'table' then
-						entry.Name = entry.Name or entry.name or tostring(name)
-						table.insert(list, entry)
-					else
-						table.insert(list, {Name = tostring(name), Url = tostring(entry)})
+				for name, entry in source do
+					local normalized = normalizeEntry(name, entry)
+					if normalized then
+						table.insert(list, normalized)
 					end
 				end
 			end
+
 			return list
 		end
 
@@ -5313,11 +5368,8 @@ function mainapi:CreateCategoryList(categorysettings)
 				end
 				local downloaded
 				for _, profileUrl in urlsToTry do
-					local ok, result = pcall(function()
-						return game:HttpGet(profileUrl, true)
-					end)
-					if ok and type(result) == 'string' and result ~= '' and not result:find('<!DOCTYPE', 1, true) then
-						downloaded = result
+					downloaded = publicHttpGet(profileUrl)
+					if downloaded then
 						break
 					end
 				end
@@ -5570,10 +5622,8 @@ function mainapi:CreateCategoryList(categorysettings)
 			clearContainer(publicList, publicLayout)
 			local decoded
 			for _, apiUrl in publicProfilesApis do
-				local ok, result = pcall(function()
-					return game:HttpGet(apiUrl, true)
-				end)
-				if ok and type(result) == 'string' and result ~= '' and not result:find('<!DOCTYPE', 1, true) then
+				local result = publicHttpGet(apiUrl)
+				if result then
 					local decodedOk, decodedResult = pcall(function()
 						return httpService:JSONDecode(result)
 					end)
@@ -5587,7 +5637,7 @@ function mainapi:CreateCategoryList(categorysettings)
 				local fail = Instance.new('TextLabel')
 				fail.Size = UDim2.fromOffset(470, 30)
 				fail.BackgroundTransparency = 1
-				fail.Text = 'Could not load public profiles JSON.'
+				fail.Text = 'Could not load online profiles JSON.'
 				fail.TextColor3 = standaloneTheme.Muted
 				fail.TextSize = 12
 				fail.FontFace = uipallet.Font
