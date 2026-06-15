@@ -493,6 +493,20 @@ mainapi.Libraries = {
 	uipallet = uipallet,
 }
 
+local function isVisibleGuiObject(obj)
+	return typeof(obj) == 'Instance' and obj:IsA('GuiObject')
+end
+
+local function getWindowVisible(obj)
+	return isVisibleGuiObject(obj) and obj.Visible or false
+end
+
+local function setWindowVisible(obj, visible)
+	if isVisibleGuiObject(obj) then
+		obj.Visible = visible
+	end
+end
+
 local components
 components = {
 	Button = function(optionsettings, children, api)
@@ -6443,7 +6457,7 @@ function mainapi:CreateLegit()
 			if v.Children then
 				local visible = clickgui.Visible
 				for _, v2 in self.Windows do
-					visible = visible or v2.Visible
+					visible = visible or getWindowVisible(v2)
 				end
 				v.Children.Visible = (not visible or window.Visible) and v.Enabled
 			end
@@ -6721,7 +6735,7 @@ function mainapi:Load(skipgui, profile)
 				setthreadidentity(8)
 			end
 			for _, v in self.Windows do
-				v.Visible = false
+				setWindowVisible(v, false)
 			end
 			for _, mobileButton in self.Modules do
 				if mobileButton.Bind.Button then
@@ -6950,7 +6964,7 @@ mainapi:Clean(clickgui:GetPropertyChangedSignal('Visible'):Connect(function()
 		repeat
 			local visibleCheck = clickgui.Visible
 			for _, v in mainapi.Windows do
-				visibleCheck = visibleCheck or v.Visible
+				visibleCheck = visibleCheck or getWindowVisible(v)
 			end
 			if not visibleCheck then break end
 
@@ -8169,7 +8183,7 @@ mainapi:Clean(inputService.InputBegan:Connect(function(inputObj)
 				setthreadidentity(8)
 			end
 			for _, v in mainapi.Windows do
-				v.Visible = false
+				setWindowVisible(v, false)
 			end
 			clickgui.Visible = not clickgui.Visible
 			tooltip.Visible = false
