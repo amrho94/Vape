@@ -493,6 +493,11 @@ mainapi.Libraries = {
 	uipallet = uipallet,
 }
 
+-- Default UI context used by shared components/main settings pane.
+-- Some component code checks categorysettings.Profiles even when it is not
+-- being created inside a category window, so this prevents nil indexing.
+local categorysettings = {Profiles = false}
+
 local components
 components = {
 	Button = function(optionsettings, children, api)
