@@ -1922,7 +1922,7 @@ components = {
 				object.AutoButtonColor = false
 				object.Text = ''
 				object.Parent = window
-				addCorner(object)
+				addCorner(object, UDim.new(0, categorysettings.Profiles and 3 or 5))
 				local objectbkg = Instance.new('Frame')
 				objectbkg.Name = 'BKG'
 				objectbkg.Size = UDim2.new(1, -2, 1, -2)
@@ -2014,7 +2014,7 @@ components = {
 			end
 		end
 		
-		addbutton.MouseEnter:Connect(function()
+	addbutton.MouseEnter:Connect(function()
 			addbutton.ImageTransparency = 0
 		end)
 		addbutton.MouseLeave:Connect(function()
@@ -2543,7 +2543,7 @@ function mainapi:CreateGUI()
 	title.Text = 'Settings'
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextColor3 = uipallet.Text
-	title.TextSize = 13
+	title.TextSize = categorysettings.Profiles and 14 or 13
 	title.FontFace = uipallet.Font
 	title.Parent = settingspane
 	local close = addCloseButton(settingspane)
@@ -3672,7 +3672,7 @@ function mainapi:CreateCategory(categorysettings)
 	arrow.BackgroundTransparency = 1
 	arrow.Image = getcustomasset('vape/assets/new/expandup.png')
 	arrow.ImageColor3 = Color3.fromRGB(140, 140, 140)
-	arrow.Rotation = 180
+	arrow.Rotation = categorysettings.Profiles and 0 or 180
 	arrow.Parent = arrowbutton
 	local children = Instance.new('ScrollingFrame')
 	children.Name = 'Children'
@@ -3680,8 +3680,8 @@ function mainapi:CreateCategory(categorysettings)
 	children.Position = UDim2.fromOffset(0, 37)
 	children.BackgroundTransparency = 1
 	children.BorderSizePixel = 0
-	children.Visible = false
-	children.ScrollBarThickness = 2
+	children.Visible = categorysettings.Profiles and true or false
+	children.ScrollBarThickness = categorysettings.Profiles and 0 or 2
 	children.ScrollBarImageTransparency = 0.75
 	children.CanvasSize = UDim2.new()
 	children.Parent = window
@@ -4261,7 +4261,7 @@ end
 function mainapi:CreateCategoryList(categorysettings)
 	local categoryapi = {
 		Type = 'CategoryList',
-		Expanded = false,
+		Expanded = categorysettings.Profiles and true or false,
 		List = {},
 		ListEnabled = {},
 		Objects = {},
@@ -4271,9 +4271,9 @@ function mainapi:CreateCategoryList(categorysettings)
 
 	local window = Instance.new('TextButton')
 	window.Name = categorysettings.Name..'CategoryList'
-	window.Size = UDim2.fromOffset(220, 45)
+	window.Size = UDim2.fromOffset(220, categorysettings.Profiles and 342 or 45)
 	window.Position = UDim2.fromOffset(240, 46)
-	window.BackgroundColor3 = uipallet.Main
+	window.BackgroundColor3 = categorysettings.Profiles and Color3.fromRGB(17, 17, 19) or uipallet.Main
 	window.AutoButtonColor = false
 	window.Visible = false
 	window.Text = ''
@@ -4297,7 +4297,7 @@ function mainapi:CreateCategoryList(categorysettings)
 	title.Text = categorysettings.Name
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextColor3 = uipallet.Text
-	title.TextSize = 13
+	title.TextSize = categorysettings.Profiles and 14 or 13
 	title.FontFace = uipallet.Font
 	title.Parent = window
 	local arrowbutton = Instance.new('TextButton')
@@ -4314,7 +4314,7 @@ function mainapi:CreateCategoryList(categorysettings)
 	arrow.BackgroundTransparency = 1
 	arrow.Image = getcustomasset('vape/assets/new/expandup.png')
 	arrow.ImageColor3 = Color3.fromRGB(140, 140, 140)
-	arrow.Rotation = 180
+	arrow.Rotation = categorysettings.Profiles and 0 or 180
 	arrow.Parent = arrowbutton
 	local children = Instance.new('ScrollingFrame')
 	children.Name = 'Children'
@@ -4322,8 +4322,8 @@ function mainapi:CreateCategoryList(categorysettings)
 	children.Position = UDim2.fromOffset(0, 45)
 	children.BackgroundTransparency = 1
 	children.BorderSizePixel = 0
-	children.Visible = false
-	children.ScrollBarThickness = 2
+	children.Visible = categorysettings.Profiles and true or false
+	children.ScrollBarThickness = categorysettings.Profiles and 0 or 2
 	children.ScrollBarImageTransparency = 0.75
 	children.CanvasSize = UDim2.new()
 	children.Parent = window
@@ -4335,12 +4335,25 @@ function mainapi:CreateCategoryList(categorysettings)
 	local settings = Instance.new('ImageButton')
 	settings.Name = 'Settings'
 	settings.Size = UDim2.fromOffset(16, 16)
-	settings.Position = UDim2.new(1, -52, 0, 13)
+	settings.Position = categorysettings.Profiles and UDim2.new(1, -55, 0, 11) or UDim2.new(1, -52, 0, 13)
 	settings.BackgroundTransparency = 1
 	settings.AutoButtonColor = false
-	settings.Image = getcustomasset('vape/assets/new/customsettings.png')
-	settings.ImageColor3 = color.Dark(uipallet.Text, 0.43)
+	settings.Image = categorysettings.Profiles and getcustomasset('vape/assets/new/guisettings.png') or getcustomasset('vape/assets/new/customsettings.png')
+	settings.ImageColor3 = categorysettings.Profiles and Color3.fromRGB(160, 160, 160) or color.Dark(uipallet.Text, 0.43)
 	settings.Parent = window
+	local editprofile
+	if categorysettings.Profiles then
+		editprofile = Instance.new('ImageButton')
+		editprofile.Name = 'EditProfile'
+		editprofile.Size = UDim2.fromOffset(16, 16)
+		editprofile.Position = UDim2.new(1, -82, 0, 11)
+		editprofile.BackgroundTransparency = 1
+		editprofile.AutoButtonColor = false
+		editprofile.Image = getcustomasset('vape/assets/new/edit.png')
+		editprofile.ImageColor3 = Color3.fromRGB(160, 160, 160)
+		editprofile.Parent = window
+		addTooltip(editprofile, 'Create a profile')
+	end
 	local divider = Instance.new('Frame')
 	divider.Name = 'Divider'
 	divider.Size = UDim2.new(1, 0, 0, 1)
@@ -4353,45 +4366,122 @@ function mainapi:CreateCategoryList(categorysettings)
 	local windowlist = Instance.new('UIListLayout')
 	windowlist.SortOrder = Enum.SortOrder.LayoutOrder
 	windowlist.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	windowlist.Padding = UDim.new(0, 3)
+	windowlist.Padding = UDim.new(0, categorysettings.Profiles and 7 or 3)
 	windowlist.Parent = children
 	local windowlisttwo = Instance.new('UIListLayout')
 	windowlisttwo.SortOrder = Enum.SortOrder.LayoutOrder
 	windowlisttwo.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	windowlisttwo.Parent = childrentwo
-	local addbkg = Instance.new('Frame')
-	addbkg.Name = 'Add'
-	addbkg.Size = UDim2.fromOffset(200, 31)
-	addbkg.Position = UDim2.fromOffset(10, 45)
-	addbkg.BackgroundColor3 = color.Light(uipallet.Main, 0.02)
-	addbkg.Parent = children
-	addCorner(addbkg)
-	local addbox = addbkg:Clone()
-	addbox.Size = UDim2.new(1, -2, 1, -2)
-	addbox.Position = UDim2.fromOffset(1, 1)
-	addbox.BackgroundColor3 = color.Dark(uipallet.Main, 0.02)
-	addbox.Parent = addbkg
-	local addvalue = Instance.new('TextBox')
-	addvalue.Size = UDim2.new(1, -35, 1, 0)
-	addvalue.Position = UDim2.fromOffset(10, 0)
-	addvalue.BackgroundTransparency = 1
-	addvalue.Text = ''
-	addvalue.PlaceholderText = categorysettings.Placeholder or 'Add entry...'
-	addvalue.TextXAlignment = Enum.TextXAlignment.Left
-	addvalue.TextColor3 = Color3.new(1, 1, 1)
-	addvalue.TextSize = 15
-	addvalue.FontFace = uipallet.Font
-	addvalue.ClearTextOnFocus = false
-	addvalue.Parent = addbkg
-	local addbutton = Instance.new('ImageButton')
-	addbutton.Name = 'AddButton'
-	addbutton.Size = UDim2.fromOffset(16, 16)
-	addbutton.Position = UDim2.new(1, -26, 0, 8)
-	addbutton.BackgroundTransparency = 1
-	addbutton.Image = getcustomasset('vape/assets/new/add.png')
-	addbutton.ImageColor3 = categorysettings.Color
-	addbutton.ImageTransparency = 0.3
-	addbutton.Parent = addbkg
+	local topRow
+	local publicbutton
+	local addbkg
+	local addbox
+	local addvalue
+	local addbutton
+	if categorysettings.Profiles then
+		topRow = Instance.new('Frame')
+		topRow.Name = 'ProfileActions'
+		topRow.Size = UDim2.fromOffset(200, 31)
+		topRow.BackgroundTransparency = 1
+		topRow.Parent = children
+		addbkg = Instance.new('Frame')
+		addbkg.Name = 'Add'
+		addbkg.Size = UDim2.fromOffset(112, 31)
+		addbkg.BackgroundColor3 = Color3.fromRGB(24, 24, 27)
+		addbkg.Parent = topRow
+		addCorner(addbkg, UDim.new(0, 3))
+		local addstroke = Instance.new('UIStroke')
+		addstroke.Color = Color3.fromRGB(34, 34, 38)
+		addstroke.Transparency = 0.15
+		addstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		addstroke.Parent = addbkg
+		addbox = Instance.new('Frame')
+		addbox.Size = UDim2.new(1, -2, 1, -2)
+		addbox.Position = UDim2.fromOffset(1, 1)
+		addbox.BackgroundColor3 = Color3.fromRGB(21, 21, 24)
+		addbox.Parent = addbkg
+		addCorner(addbox, UDim.new(0, 3))
+		addbutton = Instance.new('ImageButton')
+		addbutton.Name = 'AddButton'
+		addbutton.Size = UDim2.fromOffset(14, 14)
+		addbutton.Position = UDim2.fromOffset(14, 8)
+		addbutton.BackgroundTransparency = 1
+		addbutton.Image = getcustomasset('vape/assets/new/add.png')
+		addbutton.ImageColor3 = categorysettings.Color
+		addbutton.ImageTransparency = 0
+		addbutton.Parent = addbkg
+		addvalue = Instance.new('TextBox')
+		addvalue.Size = UDim2.new(1, -38, 1, 0)
+		addvalue.Position = UDim2.fromOffset(35, 0)
+		addvalue.BackgroundTransparency = 1
+		addvalue.Text = ''
+		addvalue.PlaceholderText = 'CREATE NEW'
+		addvalue.TextXAlignment = Enum.TextXAlignment.Left
+		addvalue.TextColor3 = Color3.fromRGB(225, 225, 225)
+		addvalue.PlaceholderColor3 = Color3.fromRGB(145, 145, 150)
+		addvalue.TextSize = 10
+		addvalue.FontFace = uipallet.FontSemiBold
+		addvalue.ClearTextOnFocus = false
+		addvalue.Parent = addbkg
+		publicbutton = Instance.new('TextButton')
+		publicbutton.Name = 'Public'
+		publicbutton.Size = UDim2.fromOffset(78, 31)
+		publicbutton.Position = UDim2.fromOffset(122, 0)
+		publicbutton.BackgroundColor3 = Color3.fromRGB(24, 24, 27)
+		publicbutton.BorderSizePixel = 0
+		publicbutton.AutoButtonColor = false
+		publicbutton.Text = '      PUBLIC'
+		publicbutton.TextXAlignment = Enum.TextXAlignment.Left
+		publicbutton.TextColor3 = Color3.fromRGB(145, 145, 150)
+		publicbutton.TextSize = 10
+		publicbutton.FontFace = uipallet.FontSemiBold
+		publicbutton.Parent = topRow
+		addCorner(publicbutton, UDim.new(0, 3))
+		local publicstroke = addstroke:Clone()
+		publicstroke.Parent = publicbutton
+		local publicicon = Instance.new('ImageLabel')
+		publicicon.Name = 'Icon'
+		publicicon.Size = UDim2.fromOffset(14, 14)
+		publicicon.Position = UDim2.fromOffset(13, 8)
+		publicicon.BackgroundTransparency = 1
+		publicicon.Image = getcustomasset('vape/assets/new/profilesicon.png')
+		publicicon.ImageColor3 = Color3.fromRGB(145, 145, 150)
+		publicicon.Parent = publicbutton
+	else
+		addbkg = Instance.new('Frame')
+		addbkg.Name = 'Add'
+		addbkg.Size = UDim2.fromOffset(200, 31)
+		addbkg.Position = UDim2.fromOffset(10, 45)
+		addbkg.BackgroundColor3 = color.Light(uipallet.Main, 0.02)
+		addbkg.Parent = children
+		addCorner(addbkg)
+		addbox = addbkg:Clone()
+		addbox.Size = UDim2.new(1, -2, 1, -2)
+		addbox.Position = UDim2.fromOffset(1, 1)
+		addbox.BackgroundColor3 = color.Dark(uipallet.Main, 0.02)
+		addbox.Parent = addbkg
+		addvalue = Instance.new('TextBox')
+		addvalue.Size = UDim2.new(1, -35, 1, 0)
+		addvalue.Position = UDim2.fromOffset(10, 0)
+		addvalue.BackgroundTransparency = 1
+		addvalue.Text = ''
+		addvalue.PlaceholderText = categorysettings.Placeholder or 'Add entry...'
+		addvalue.TextXAlignment = Enum.TextXAlignment.Left
+		addvalue.TextColor3 = Color3.new(1, 1, 1)
+		addvalue.TextSize = 15
+		addvalue.FontFace = uipallet.Font
+		addvalue.ClearTextOnFocus = false
+		addvalue.Parent = addbkg
+		addbutton = Instance.new('ImageButton')
+		addbutton.Name = 'AddButton'
+		addbutton.Size = UDim2.fromOffset(16, 16)
+		addbutton.Position = UDim2.new(1, -26, 0, 8)
+		addbutton.BackgroundTransparency = 1
+		addbutton.Image = getcustomasset('vape/assets/new/add.png')
+		addbutton.ImageColor3 = categorysettings.Color
+		addbutton.ImageTransparency = 0.3
+		addbutton.Parent = addbkg
+	end
 	local cursedpadding = Instance.new('Frame')
 	cursedpadding.Size = UDim2.fromOffset()
 	cursedpadding.BackgroundTransparency = 1
@@ -4438,31 +4528,31 @@ function mainapi:CreateCategoryList(categorysettings)
 			if categorysettings.Profiles then
 				local object = Instance.new('TextButton')
 				object.Name = v.Name
-				object.Size = UDim2.fromOffset(200, 33)
-				object.BackgroundColor3 = color.Light(uipallet.Main, 0.02)
+				object.Size = UDim2.fromOffset(200, categorysettings.Profiles and 31 or 33)
+				object.BackgroundColor3 = v.Name == mainapi.Profile and categorysettings.Color or (categorysettings.Profiles and Color3.fromRGB(22, 22, 24) or color.Light(uipallet.Main, 0.02))
 				object.AutoButtonColor = false
 				object.Text = ''
 				object.Parent = children
-				addCorner(object)
+				addCorner(object, UDim.new(0, categorysettings.Profiles and 3 or 5))
 				local objectstroke = Instance.new('UIStroke')
-				objectstroke.Color = color.Light(uipallet.Main, 0.1)
+				objectstroke.Color = categorysettings.Profiles and Color3.fromRGB(38, 38, 42) or color.Light(uipallet.Main, 0.1)
 				objectstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 				objectstroke.Enabled = false
 				objectstroke.Parent = object
 				local objecttitle = Instance.new('TextLabel')
 				objecttitle.Name = 'Title'
-				objecttitle.Size = UDim2.new(1, -10, 1, 0)
+				objecttitle.Size = UDim2.new(1, -42, 1, 0)
 				objecttitle.Position = UDim2.fromOffset(10, 0)
 				objecttitle.BackgroundTransparency = 1
 				objecttitle.Text = v.Name
 				objecttitle.TextXAlignment = Enum.TextXAlignment.Left
-				objecttitle.TextColor3 = color.Dark(uipallet.Text, 0.4)
-				objecttitle.TextSize = 15
+				objecttitle.TextColor3 = v.Name == mainapi.Profile and Color3.fromRGB(245, 245, 245) or Color3.fromRGB(175, 175, 180)
+				objecttitle.TextSize = 14
 				objecttitle.FontFace = uipallet.Font
 				objecttitle.Parent = object
 				local dotsbutton = Instance.new('TextButton')
 				dotsbutton.Name = 'Dots'
-				dotsbutton.Size = UDim2.fromOffset(25, 33)
+				dotsbutton.Size = UDim2.fromOffset(25, categorysettings.Profiles and 31 or 33)
 				dotsbutton.Position = UDim2.new(1, -25, 0, 0)
 				dotsbutton.BackgroundTransparency = 1
 				dotsbutton.Text = ''
@@ -4470,10 +4560,10 @@ function mainapi:CreateCategoryList(categorysettings)
 				local dots = Instance.new('ImageLabel')
 				dots.Name = 'Dots'
 				dots.Size = UDim2.fromOffset(3, 16)
-				dots.Position = UDim2.fromOffset(10, 9)
+				dots.Position = UDim2.fromOffset(10, categorysettings.Profiles and 8 or 9)
 				dots.BackgroundTransparency = 1
 				dots.Image = getcustomasset('vape/assets/new/dots.png')
-				dots.ImageColor3 = color.Light(uipallet.Main, 0.37)
+				dots.ImageColor3 = v.Name == mainapi.Profile and Color3.fromRGB(245, 245, 245) or color.Light(uipallet.Main, 0.37)
 				dots.Parent = dotsbutton
 				local bind = Instance.new('TextButton')
 				addTooltip(bind, 'Click to bind')
@@ -4561,17 +4651,19 @@ function mainapi:CreateCategoryList(categorysettings)
 					mainapi:Load(true)
 				end)
 				object.MouseEnter:Connect(function()
-					bind.Visible = true
+					bind.Visible = not categorysettings.Profiles
 					if v.Name ~= mainapi.Profile then
 						objectstroke.Enabled = true
-						objecttitle.TextColor3 = color.Dark(uipallet.Text, 0.16)
+						object.BackgroundColor3 = categorysettings.Profiles and Color3.fromRGB(28, 28, 31) or object.BackgroundColor3
+						objecttitle.TextColor3 = categorysettings.Profiles and Color3.fromRGB(230, 230, 235) or color.Dark(uipallet.Text, 0.16)
 					end
 				end)
 				object.MouseLeave:Connect(function()
-					bind.Visible = #v.Bind > 0
+					bind.Visible = not categorysettings.Profiles and #v.Bind > 0
 					if v.Name ~= mainapi.Profile then
 						objectstroke.Enabled = false
-						objecttitle.TextColor3 = color.Dark(uipallet.Text, 0.4)
+						object.BackgroundColor3 = categorysettings.Profiles and Color3.fromRGB(22, 22, 24) or object.BackgroundColor3
+						objecttitle.TextColor3 = categorysettings.Profiles and Color3.fromRGB(175, 175, 180) or color.Dark(uipallet.Text, 0.4)
 					end
 				end)
 
@@ -4709,7 +4801,7 @@ function mainapi:CreateCategoryList(categorysettings)
 		self.Expanded = not self.Expanded
 		children.Visible = self.Expanded
 		arrow.Rotation = self.Expanded and 0 or 180
-		window.Size = UDim2.fromOffset(220, self.Expanded and math.min(51 + windowlist.AbsoluteContentSize.Y / scale.Scale, 611) or 45)
+		window.Size = UDim2.fromOffset(220, self.Expanded and (categorysettings.Profiles and 342 or math.min(51 + windowlist.AbsoluteContentSize.Y / scale.Scale, 611)) or 45)
 		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
 	end
 
@@ -4727,6 +4819,374 @@ function mainapi:CreateCategoryList(categorysettings)
 		end
 	end
 
+	local function createCategoryEntry()
+		local entry = addvalue.Text:gsub('^%s+', ''):gsub('%s+$', '')
+		local exists = categorysettings.Profiles and categoryapi:GetValue(entry) or table.find(categoryapi.List, entry)
+		if entry ~= '' and not exists then
+			categoryapi:ChangeValue(entry)
+			addvalue.Text = ''
+		end
+	end
+	if editprofile then
+		editprofile.MouseEnter:Connect(function()
+			editprofile.ImageColor3 = uipallet.Text
+		end)
+		editprofile.MouseLeave:Connect(function()
+			editprofile.ImageColor3 = Color3.fromRGB(160, 160, 160)
+		end)
+		editprofile.MouseButton1Click:Connect(function()
+			addvalue:CaptureFocus()
+		end)
+	end
+	if publicbutton then
+		local publicProfilesApi = 'http://amrho94.github.io/profiles/profiles.json'
+		local publicProfilesApis = {
+			publicProfilesApi,
+			'http://amrho94.github.io/profiles.json',
+			'https://amrho94.github.io/profiles/profiles.json',
+			'https://amrho94.github.io/profiles.json'
+		}
+		local publicWindow = Instance.new('TextButton')
+		publicWindow.Name = 'PublicProfilesWindow'
+		publicWindow.Size = UDim2.fromOffset(300, 316)
+		publicWindow.Position = UDim2.fromOffset(window.Position.X.Offset + 230, window.Position.Y.Offset)
+		publicWindow.BackgroundColor3 = Color3.fromRGB(17, 17, 19)
+		publicWindow.AutoButtonColor = false
+		publicWindow.Visible = false
+		publicWindow.Text = ''
+		publicWindow.Parent = clickgui
+		addBlur(publicWindow)
+		addCorner(publicWindow, UDim.new(0, 4))
+		makeDraggable(publicWindow)
+
+		local publicTitle = Instance.new('TextLabel')
+		publicTitle.Name = 'Title'
+		publicTitle.Size = UDim2.new(1, -56, 0, 40)
+		publicTitle.Position = UDim2.fromOffset(14, 0)
+		publicTitle.BackgroundTransparency = 1
+		publicTitle.Text = 'Public profiles'
+		publicTitle.TextXAlignment = Enum.TextXAlignment.Left
+		publicTitle.TextColor3 = uipallet.Text
+		publicTitle.TextSize = 14
+		publicTitle.FontFace = uipallet.Font
+		publicTitle.Parent = publicWindow
+
+		local publicClose = addCloseButton(publicWindow, 8)
+		publicClose.MouseButton1Click:Connect(function()
+			publicWindow.Visible = false
+		end)
+
+		local apiLabel = Instance.new('TextLabel')
+		apiLabel.Name = 'ApiLabel'
+		apiLabel.Size = UDim2.new(1, -28, 0, 18)
+		apiLabel.Position = UDim2.fromOffset(14, 39)
+		apiLabel.BackgroundTransparency = 1
+		apiLabel.Text = publicProfilesApi:gsub('https://', ''):gsub('http://', '')
+		apiLabel.TextXAlignment = Enum.TextXAlignment.Left
+		apiLabel.TextColor3 = Color3.fromRGB(120, 120, 126)
+		apiLabel.TextSize = 10
+		apiLabel.FontFace = uipallet.Font
+		apiLabel.Parent = publicWindow
+
+		local searchBkg = Instance.new('Frame')
+		searchBkg.Name = 'Search'
+		searchBkg.Size = UDim2.new(1, -28, 0, 30)
+		searchBkg.Position = UDim2.fromOffset(14, 63)
+		searchBkg.BackgroundColor3 = Color3.fromRGB(21, 21, 24)
+		searchBkg.Parent = publicWindow
+		addCorner(searchBkg, UDim.new(0, 3))
+		local searchStroke = Instance.new('UIStroke')
+		searchStroke.Color = Color3.fromRGB(34, 34, 38)
+		searchStroke.Transparency = 0.15
+		searchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		searchStroke.Parent = searchBkg
+		local searchBox = Instance.new('TextBox')
+		searchBox.Name = 'TextBox'
+		searchBox.Size = UDim2.new(1, -20, 1, 0)
+		searchBox.Position = UDim2.fromOffset(10, 0)
+		searchBox.BackgroundTransparency = 1
+		searchBox.ClearTextOnFocus = false
+		searchBox.PlaceholderText = 'Search public profiles'
+		searchBox.PlaceholderColor3 = Color3.fromRGB(115, 115, 120)
+		searchBox.Text = ''
+		searchBox.TextXAlignment = Enum.TextXAlignment.Left
+		searchBox.TextColor3 = Color3.fromRGB(225, 225, 230)
+		searchBox.TextSize = 12
+		searchBox.FontFace = uipallet.Font
+		searchBox.Parent = searchBkg
+
+		local publicList = Instance.new('ScrollingFrame')
+		publicList.Name = 'List'
+		publicList.Size = UDim2.new(1, -28, 1, -108)
+		publicList.Position = UDim2.fromOffset(14, 100)
+		publicList.BackgroundTransparency = 1
+		publicList.BorderSizePixel = 0
+		publicList.ScrollBarThickness = 0
+		publicList.CanvasSize = UDim2.new()
+		publicList.Parent = publicWindow
+		local publicLayout = Instance.new('UIListLayout')
+		publicLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		publicLayout.Padding = UDim.new(0, 7)
+		publicLayout.Parent = publicList
+
+		local loadedPublicProfiles = {}
+
+		local function safeProfileName(name)
+			name = tostring(name or ''):gsub('^%s+', ''):gsub('%s+$', '')
+			name = name:gsub('[/:*?"<>|]', ''):gsub('\\', '')
+			return name:sub(1, 32)
+		end
+
+		local function clearPublicList()
+			for _, obj in publicList:GetChildren() do
+				if obj ~= publicLayout then
+					obj:Destroy()
+				end
+			end
+		end
+
+		local function createStatusRow(text)
+			clearPublicList()
+			local row = Instance.new('TextLabel')
+			row.Name = 'Status'
+			row.Size = UDim2.new(1, 0, 0, 36)
+			row.BackgroundColor3 = Color3.fromRGB(22, 22, 24)
+			row.BorderSizePixel = 0
+			row.Text = text
+			row.TextColor3 = Color3.fromRGB(145, 145, 150)
+			row.TextSize = 12
+			row.FontFace = uipallet.Font
+			row.Parent = publicList
+			addCorner(row, UDim.new(0, 3))
+			publicList.CanvasSize = UDim2.fromOffset(0, 43)
+		end
+
+		local function normalizePublicProfiles(raw)
+			local list = {}
+			if type(raw) ~= 'table' then
+				return list
+			end
+			raw = raw.profiles or raw.Profiles or raw.data or raw
+			if raw[1] ~= nil then
+				for _, entry in raw do
+					if type(entry) == 'table' then
+						table.insert(list, entry)
+					end
+				end
+			else
+				for name, entry in raw do
+					if type(entry) == 'table' then
+						entry.Name = entry.Name or entry.name or tostring(name)
+						table.insert(list, entry)
+					else
+						table.insert(list, {Name = tostring(name), Url = tostring(entry)})
+					end
+				end
+			end
+			return list
+		end
+
+		local function importPublicProfile(entry, label)
+			local profileName = safeProfileName(entry.Name or entry.name or entry.title or entry.Title)
+			if profileName == '' then
+				label.Text = 'Invalid profile name'
+				return
+			end
+
+			local payload = entry.Config or entry.config or entry.Data or entry.data
+			if not payload then
+				local url = entry.Url or entry.URL or entry.url or entry.RawUrl or entry.rawUrl or entry.File or entry.file
+				if type(url) ~= 'string' or url == '' then
+					label.Text = 'API entry has no file URL'
+					return
+				end
+				local urlsToTry = {url}
+				if url:sub(1, 8) == 'https://' then
+					table.insert(urlsToTry, 'http://'..url:sub(9))
+				elseif url:sub(1, 7) == 'http://' then
+					table.insert(urlsToTry, 'https://'..url:sub(8))
+				end
+
+				local downloaded
+				for _, profileUrl in urlsToTry do
+					local ok, result = pcall(function()
+						return game:HttpGet(profileUrl, true)
+					end)
+					if ok and type(result) == 'string' and result ~= '' and not result:find('<!DOCTYPE', 1, true) then
+						downloaded = result
+						break
+					end
+				end
+				if not downloaded then
+					label.Text = 'Failed to download profile'
+					return
+				end
+				payload = downloaded
+			end
+
+			if type(payload) == 'table' then
+				payload = httpService:JSONEncode(payload)
+			end
+			local okDecode, decoded = pcall(function()
+				return httpService:JSONDecode(payload)
+			end)
+			if not okDecode or type(decoded) ~= 'table' then
+				label.Text = 'Profile is not valid JSON'
+				return
+			end
+
+			if not writefile then
+				label.Text = 'Executor is missing writefile'
+				return
+			end
+			writefile('vape/profiles/'..profileName..mainapi.Place..'.txt', payload)
+			if not categoryapi:GetValue(profileName) then
+				table.insert(mainapi.Profiles, {Name = profileName, Bind = {}})
+			end
+			mainapi:Save(profileName)
+			mainapi:Load(true)
+			publicWindow.Visible = false
+		end
+
+		local function renderPublicProfiles()
+			clearPublicList()
+			local query = searchBox.Text:lower()
+			local shown = 0
+			for _, entry in loadedPublicProfiles do
+				local name = tostring(entry.Name or entry.name or entry.title or entry.Title or 'Unnamed')
+				local author = tostring(entry.Author or entry.author or entry.Creator or entry.creator or 'Public profile')
+				local desc = tostring(entry.Description or entry.description or entry.Game or entry.game or author)
+				if query ~= '' and not (name:lower():find(query, 1, true) or desc:lower():find(query, 1, true) or author:lower():find(query, 1, true)) then
+					continue
+				end
+				shown += 1
+
+				local row = Instance.new('TextButton')
+				row.Name = safeProfileName(name) ~= '' and safeProfileName(name) or 'PublicProfile'
+				row.Size = UDim2.new(1, 0, 0, 52)
+				row.BackgroundColor3 = Color3.fromRGB(22, 22, 24)
+				row.BorderSizePixel = 0
+				row.AutoButtonColor = false
+				row.Text = ''
+				row.Parent = publicList
+				addCorner(row, UDim.new(0, 3))
+				local rowStroke = Instance.new('UIStroke')
+				rowStroke.Color = Color3.fromRGB(38, 38, 42)
+				rowStroke.Transparency = 0.35
+				rowStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+				rowStroke.Parent = row
+
+				local nameLabel = Instance.new('TextLabel')
+				nameLabel.Name = 'Name'
+				nameLabel.Size = UDim2.new(1, -74, 0, 21)
+				nameLabel.Position = UDim2.fromOffset(11, 7)
+				nameLabel.BackgroundTransparency = 1
+				nameLabel.Text = name
+				nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+				nameLabel.TextColor3 = Color3.fromRGB(230, 230, 235)
+				nameLabel.TextSize = 13
+				nameLabel.FontFace = uipallet.Font
+				nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+				nameLabel.Parent = row
+
+				local descLabel = Instance.new('TextLabel')
+				descLabel.Name = 'Description'
+				descLabel.Size = UDim2.new(1, -74, 0, 17)
+				descLabel.Position = UDim2.fromOffset(11, 28)
+				descLabel.BackgroundTransparency = 1
+				descLabel.Text = desc
+				descLabel.TextXAlignment = Enum.TextXAlignment.Left
+				descLabel.TextColor3 = Color3.fromRGB(130, 130, 136)
+				descLabel.TextSize = 10
+				descLabel.FontFace = uipallet.Font
+				descLabel.TextTruncate = Enum.TextTruncate.AtEnd
+				descLabel.Parent = row
+
+				local import = Instance.new('TextButton')
+				import.Name = 'Import'
+				import.Size = UDim2.fromOffset(58, 26)
+				import.Position = UDim2.new(1, -67, 0, 13)
+				import.BackgroundColor3 = categorysettings.Color
+				import.BorderSizePixel = 0
+				import.AutoButtonColor = false
+				import.Text = 'IMPORT'
+				import.TextColor3 = Color3.fromRGB(245, 245, 245)
+				import.TextSize = 10
+				import.FontFace = uipallet.FontSemiBold
+				import.Parent = row
+				addCorner(import, UDim.new(0, 3))
+
+				row.MouseEnter:Connect(function()
+					tween:Tween(row, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(28, 28, 31)})
+				end)
+				row.MouseLeave:Connect(function()
+					tween:Tween(row, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(22, 22, 24)})
+				end)
+				import.MouseButton1Click:Connect(function()
+					descLabel.Text = 'Importing...'
+					importPublicProfile(entry, descLabel)
+				end)
+				row.MouseButton1Click:Connect(function()
+					descLabel.Text = 'Importing...'
+					importPublicProfile(entry, descLabel)
+				end)
+			end
+
+			if shown == 0 then
+				createStatusRow(query == '' and 'No public profiles found.' or 'No profiles match your search.')
+			else
+				publicList.CanvasSize = UDim2.fromOffset(0, publicLayout.AbsoluteContentSize.Y / scale.Scale + 7)
+			end
+		end
+
+		local function fetchPublicProfiles()
+			createStatusRow('Loading public profiles...')
+			local decoded
+			local usedApi = publicProfilesApi
+			for _, apiUrl in publicProfilesApis do
+				local ok, result = pcall(function()
+					return game:HttpGet(apiUrl, true)
+				end)
+				if ok and type(result) == 'string' and result ~= '' and not result:find('<!DOCTYPE', 1, true) then
+					local decodedOk, decodedResult = pcall(function()
+						return httpService:JSONDecode(result)
+					end)
+					if decodedOk and type(decodedResult) == 'table' then
+						decoded = decodedResult
+						usedApi = apiUrl
+						break
+					end
+				end
+			end
+			if not decoded then
+				createStatusRow('Could not load public profiles JSON.')
+				return
+			end
+			apiLabel.Text = usedApi:gsub('https://', ''):gsub('http://', '')
+			loadedPublicProfiles = normalizePublicProfiles(decoded)
+			renderPublicProfiles()
+		end
+
+		publicLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			publicList.CanvasSize = UDim2.fromOffset(0, publicLayout.AbsoluteContentSize.Y / scale.Scale + 7)
+		end)
+		searchBox:GetPropertyChangedSignal('Text'):Connect(function()
+			renderPublicProfiles()
+		end)
+		publicbutton.MouseEnter:Connect(function()
+			tween:Tween(publicbutton, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(29, 29, 32)})
+		end)
+		publicbutton.MouseLeave:Connect(function()
+			tween:Tween(publicbutton, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(24, 24, 27)})
+		end)
+		publicbutton.MouseButton1Click:Connect(function()
+			publicWindow.Visible = not publicWindow.Visible
+			if publicWindow.Visible then
+				publicWindow.Position = UDim2.fromOffset(window.Position.X.Offset + 230, window.Position.Y.Offset)
+				fetchPublicProfiles()
+			end
+		end)
+	end
 	addbutton.MouseEnter:Connect(function()
 		addbutton.ImageTransparency = 0
 	end)
@@ -4734,10 +5194,7 @@ function mainapi:CreateCategoryList(categorysettings)
 		addbutton.ImageTransparency = 0.3
 	end)
 	addbutton.MouseButton1Click:Connect(function()
-		if not table.find(categoryapi.List, addvalue.Text) then
-			categoryapi:ChangeValue(addvalue.Text)
-			addvalue.Text = ''
-		end
+		createCategoryEntry()
 	end)
 	arrowbutton.MouseEnter:Connect(function()
 		arrow.ImageColor3 = Color3.fromRGB(220, 220, 220)
@@ -4752,19 +5209,18 @@ function mainapi:CreateCategoryList(categorysettings)
 		categoryapi:Expand()
 	end)
 	addvalue.FocusLost:Connect(function(enter)
-		if enter and not table.find(categoryapi.List, addvalue.Text) then
-			categoryapi:ChangeValue(addvalue.Text)
-			addvalue.Text = ''
+		if enter then
+			createCategoryEntry()
 		end
 	end)
 	addvalue.MouseEnter:Connect(function()
 		tween:Tween(addbkg, uipallet.Tween, {
-			BackgroundColor3 = color.Light(uipallet.Main, 0.14)
+			BackgroundColor3 = categorysettings.Profiles and Color3.fromRGB(29, 29, 32) or color.Light(uipallet.Main, 0.14)
 		})
 	end)
 	addvalue.MouseLeave:Connect(function()
 		tween:Tween(addbkg, uipallet.Tween, {
-			BackgroundColor3 = color.Light(uipallet.Main, 0.02)
+			BackgroundColor3 = categorysettings.Profiles and Color3.fromRGB(24, 24, 27) or color.Light(uipallet.Main, 0.02)
 		})
 	end)
 	children:GetPropertyChangedSignal('CanvasPosition'):Connect(function()
@@ -4774,7 +5230,7 @@ function mainapi:CreateCategoryList(categorysettings)
 		settings.ImageColor3 = uipallet.Text
 	end)
 	settings.MouseLeave:Connect(function()
-		settings.ImageColor3 = color.Light(uipallet.Main, 0.37)
+		settings.ImageColor3 = categorysettings.Profiles and Color3.fromRGB(160, 160, 160) or color.Light(uipallet.Main, 0.37)
 	end)
 	settings.MouseButton1Click:Connect(function()
 		childrentwo.Visible = not childrentwo.Visible
@@ -4790,7 +5246,7 @@ function mainapi:CreateCategoryList(categorysettings)
 		end
 		children.CanvasSize = UDim2.fromOffset(0, windowlist.AbsoluteContentSize.Y / scale.Scale)
 		if categoryapi.Expanded then
-			window.Size = UDim2.fromOffset(220, math.min(51 + windowlist.AbsoluteContentSize.Y / scale.Scale, 611))
+			window.Size = UDim2.fromOffset(220, categorysettings.Profiles and 342 or math.min(51 + windowlist.AbsoluteContentSize.Y / scale.Scale, 611))
 		end
 	end)
 	windowlisttwo:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
@@ -4949,50 +5405,273 @@ function mainapi:CreateSearch()
 end
 
 function mainapi:CreateLegit()
-	local legitapi = {Modules = {}}
+	local legitapi = {
+		Modules = {},
+		Tabs = {},
+		CurrentTab = 'ALL',
+		SearchText = ''
+	}
+
+	local legitTheme = {
+		Base = Color3.fromRGB(22, 22, 23),
+		Top = Color3.fromRGB(22, 22, 23),
+		Card = Color3.fromRGB(31, 31, 33),
+		CardHover = Color3.fromRGB(37, 37, 39),
+		CardEnabled = Color3.fromRGB(34, 34, 38),
+		Search = Color3.fromRGB(14, 14, 16),
+		Stroke = Color3.fromRGB(42, 42, 45),
+		Text = Color3.fromRGB(226, 226, 228),
+		Muted = Color3.fromRGB(142, 142, 148),
+		MutedDark = Color3.fromRGB(91, 91, 96),
+		Off = Color3.fromRGB(47, 47, 50)
+	}
+
+	local function accent()
+		return Color3.fromHSV(mainapi.GUIColor.Hue, mainapi.GUIColor.Sat, mainapi.GUIColor.Value)
+	end
+
+	local function getLegitTab(modulesettings)
+		local rawtab = modulesettings.Tab or modulesettings.Category or modulesettings.Group or modulesettings.Type
+		local tab = tostring(rawtab or ''):upper()
+		if tab == 'HUD' or tab == 'OVERLAY' or tab == 'OVERLAYS' or tab == 'RENDER' then
+			return 'HUD'
+		end
+		if tab == 'FAVORITE' or tab == 'FAVOURITE' then
+			return 'FAVORITE'
+		end
+		if rawtab == nil then
+			local name = tostring(modulesettings.Name or ''):lower()
+			if name:find('hud', 1, true) or name:find('clock', 1, true) or name:find('potion', 1, true) or name:find('keystroke', 1, true) or name:find('status', 1, true) then
+				return 'HUD'
+			end
+		end
+		return 'GAME'
+	end
+
+	local function openSettings(shadow, settingspane)
+		shadow.Visible = true
+		settingspane.Position = UDim2.fromScale(1, 0)
+		tween:Tween(shadow, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			BackgroundTransparency = 0.42
+		})
+		tween:Tween(settingspane, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			Position = UDim2.new(1, -240, 0, 0)
+		})
+	end
+
+	local function closeSettings(shadow, settingspane)
+		tween:Tween(shadow, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			BackgroundTransparency = 1
+		})
+		tween:Tween(settingspane, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+			Position = UDim2.fromScale(1, 0)
+		})
+		task.delay(0.2, function()
+			if shadow then
+				shadow.Visible = false
+			end
+		end)
+	end
 
 	local window = Instance.new('Frame')
 	window.Name = 'LegitGUI'
 	window.Size = UDim2.fromOffset(700, 389)
 	window.Position = UDim2.new(0.5, -350, 0.5, -194)
-	window.BackgroundColor3 = uipallet.Main
+	window.BackgroundColor3 = legitTheme.Base
+	window.BorderSizePixel = 0
 	window.Visible = false
+	window.ClipsDescendants = true
 	window.Parent = scaledgui
 	addBlur(window)
-	addCorner(window)
+	addCorner(window, UDim.new(0, 4))
 	makeDraggable(window)
+
+	local outline = Instance.new('UIStroke')
+	outline.Name = 'Outline'
+	outline.Color = Color3.fromRGB(10, 10, 12)
+	outline.Thickness = 1
+	outline.Transparency = 0.15
+	outline.Parent = window
+
 	local modal = Instance.new('TextButton')
 	modal.BackgroundTransparency = 1
 	modal.Text = ''
 	modal.Modal = true
+	modal.Size = UDim2.fromScale(1, 1)
 	modal.Parent = window
-	local icon = Instance.new('ImageLabel')
-	icon.Name = 'Icon'
-	icon.Size = UDim2.fromOffset(16, 16)
-	icon.Position = UDim2.fromOffset(18, 13)
-	icon.BackgroundTransparency = 1
-	icon.Image = getcustomasset('vape/assets/new/legittab.png')
-	icon.ImageColor3 = uipallet.Text
-	icon.Parent = window
-	local close = addCloseButton(window)
+
+	local cornerDots = Instance.new('Frame')
+	cornerDots.Name = 'CornerDots'
+	cornerDots.Size = UDim2.fromOffset(20, 20)
+	cornerDots.Position = UDim2.fromOffset(20, 18)
+	cornerDots.BackgroundTransparency = 1
+	cornerDots.Parent = window
+	for i = 0, 3 do
+		local dot = Instance.new('Frame')
+		dot.Size = UDim2.fromOffset(6, 6)
+		dot.Position = UDim2.fromOffset((i % 2) * 9, math.floor(i / 2) * 9)
+		dot.BackgroundColor3 = Color3.fromRGB(211, 211, 214)
+		dot.BorderSizePixel = 0
+		dot.Parent = cornerDots
+		addCorner(dot, UDim.new(1, 0))
+	end
+
+	local function makeTopIcon(name, image, x)
+		local button = Instance.new('ImageButton')
+		button.Name = name
+		button.Size = UDim2.fromOffset(24, 24)
+		button.Position = UDim2.new(1, x, 0, 20)
+		button.AnchorPoint = Vector2.new(1, 0.5)
+		button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		button.BackgroundTransparency = 1
+		button.AutoButtonColor = false
+		button.Image = image
+		button.ImageColor3 = legitTheme.Muted
+		button.ImageTransparency = 0.15
+		button.Parent = window
+		addCorner(button, UDim.new(0, 6))
+		button.MouseEnter:Connect(function()
+			button.ImageColor3 = legitTheme.Text
+			tween:Tween(button, uipallet.Tween, {BackgroundTransparency = 0.88})
+		end)
+		button.MouseLeave:Connect(function()
+			button.ImageColor3 = legitTheme.Muted
+			tween:Tween(button, uipallet.Tween, {BackgroundTransparency = 1})
+		end)
+		return button
+	end
+
+	local settingsTop = makeTopIcon('Settings', getcustomasset('vape/assets/new/guisettings.png'), -50)
+	local close = makeTopIcon('Close', getcustomasset('vape/assets/new/close.png'), -18)
+
+	local tabHolder = Instance.new('Frame')
+	tabHolder.Name = 'Tabs'
+	tabHolder.Size = UDim2.fromOffset(318, 28)
+	tabHolder.Position = UDim2.fromOffset(31, 58)
+	tabHolder.BackgroundTransparency = 1
+	tabHolder.Parent = window
+
+	local function createTab(name, x)
+		local button = Instance.new('TextButton')
+		button.Name = name
+		button.Size = UDim2.fromOffset(name == 'FAVORITE' and 74 or 45, 24)
+		button.Position = UDim2.fromOffset(x, 0)
+		button.BackgroundTransparency = 1
+		button.AutoButtonColor = false
+		button.Text = name
+		button.TextColor3 = legitTheme.Muted
+		button.TextSize = 12
+		button.FontFace = uipallet.Font
+		button.Parent = tabHolder
+		local underline = Instance.new('Frame')
+		underline.Name = 'Underline'
+		underline.Size = UDim2.fromOffset(math.max(16, button.Size.X.Offset - 22), 1)
+		underline.Position = UDim2.new(0.5, 0, 1, 2)
+		underline.AnchorPoint = Vector2.new(0.5, 0)
+		underline.BackgroundColor3 = legitTheme.Text
+		underline.BorderSizePixel = 0
+		underline.Visible = false
+		underline.Parent = button
+		legitapi.Tabs[name] = {Button = button, Underline = underline}
+		button.MouseButton1Click:Connect(function()
+			legitapi.CurrentTab = name
+			legitapi:UpdateTabs()
+			legitapi:Filter()
+		end)
+	end
+
+	createTab('FAVORITE', 0)
+	createTab('ALL', 88)
+	createTab('HUD', 144)
+	createTab('GAME', 204)
+
+	local searchbkg = Instance.new('Frame')
+	searchbkg.Name = 'SearchBox'
+	searchbkg.Size = UDim2.fromOffset(228, 29)
+	searchbkg.Position = UDim2.fromOffset(453, 56)
+	searchbkg.BackgroundColor3 = legitTheme.Search
+	searchbkg.BorderSizePixel = 0
+	searchbkg.Parent = window
+	addCorner(searchbkg, UDim.new(0, 4))
+
+	local searchStroke = Instance.new('UIStroke')
+	searchStroke.Color = legitTheme.Stroke
+	searchStroke.Thickness = 1
+	searchStroke.Transparency = 0.75
+	searchStroke.Parent = searchbkg
+
+	local searchicon = Instance.new('ImageLabel')
+	searchicon.Name = 'Icon'
+	searchicon.Size = UDim2.fromOffset(14, 14)
+	searchicon.Position = UDim2.new(1, -23, 0, 8)
+	searchicon.BackgroundTransparency = 1
+	searchicon.Image = getcustomasset('vape/assets/new/search.png')
+	searchicon.ImageColor3 = legitTheme.Muted
+	searchicon.ImageTransparency = 0.15
+	searchicon.Parent = searchbkg
+
+	local search = Instance.new('TextBox')
+	search.Name = 'TextBox'
+	search.Size = UDim2.new(1, -42, 1, 0)
+	search.Position = UDim2.fromOffset(12, 0)
+	search.BackgroundTransparency = 1
+	search.Text = ''
+	search.PlaceholderText = 'Search mods'
+	search.PlaceholderColor3 = legitTheme.Muted
+	search.TextXAlignment = Enum.TextXAlignment.Left
+	search.TextColor3 = legitTheme.Text
+	search.TextSize = 12
+	search.FontFace = uipallet.Font
+	search.ClearTextOnFocus = false
+	search.Parent = searchbkg
+
 	local children = Instance.new('ScrollingFrame')
 	children.Name = 'Children'
-	children.Size = UDim2.fromOffset(684, 340)
-	children.Position = UDim2.fromOffset(14, 41)
+	children.Size = UDim2.fromOffset(670, 290)
+	children.Position = UDim2.fromOffset(21, 91)
 	children.BackgroundTransparency = 1
 	children.BorderSizePixel = 0
 	children.ScrollBarThickness = 2
-	children.ScrollBarImageTransparency = 0.75
+	children.ScrollBarImageColor3 = Color3.fromRGB(85, 85, 90)
+	children.ScrollBarImageTransparency = 0.45
 	children.CanvasSize = UDim2.new()
 	children.Parent = window
+
 	local windowlist = Instance.new('UIGridLayout')
 	windowlist.SortOrder = Enum.SortOrder.LayoutOrder
 	windowlist.FillDirectionMaxCells = 4
 	windowlist.CellSize = UDim2.fromOffset(163, 114)
 	windowlist.CellPadding = UDim2.fromOffset(6, 5)
 	windowlist.Parent = children
+
 	legitapi.Window = window
 	table.insert(mainapi.Windows, window)
+
+	function legitapi:UpdateTabs()
+		for name, tab in self.Tabs do
+			local selected = self.CurrentTab == name
+			tab.Button.TextColor3 = selected and legitTheme.Text or legitTheme.Muted
+			tab.Underline.Visible = selected
+		end
+	end
+
+	function legitapi:Filter()
+		local query = (self.SearchText or ''):lower()
+		for _, v in self.Modules do
+			local tabOk = self.CurrentTab == 'ALL'
+				or (self.CurrentTab == 'FAVORITE' and v.Favorite)
+				or (self.CurrentTab ~= 'FAVORITE' and v.Tab == self.CurrentTab)
+			local searchOk = query == '' or v.Name:lower():find(query, 1, true) ~= nil
+			v.Object.Visible = tabOk and searchOk
+		end
+	end
+
+	legitapi:UpdateTabs()
+
+	search:GetPropertyChangedSignal('Text'):Connect(function()
+		legitapi.SearchText = search.Text:lower()
+		legitapi:Filter()
+	end)
 
 	function legitapi:CreateModule(modulesettings)
 		mainapi:Remove(modulesettings.Name)
@@ -5000,58 +5679,91 @@ function mainapi:CreateLegit()
 			Enabled = false,
 			Options = {},
 			Name = modulesettings.Name,
-			Legit = true
+			Legit = true,
+			Tab = getLegitTab(modulesettings),
+			Favorite = modulesettings.Favorite == true or modulesettings.Favourited == true
 		}
 
 		local module = Instance.new('TextButton')
 		module.Name = modulesettings.Name
-		module.BackgroundColor3 = color.Light(uipallet.Main, 0.02)
+		module.BackgroundColor3 = legitTheme.Card
+		module.BorderSizePixel = 0
 		module.Text = ''
 		module.AutoButtonColor = false
+		module.ClipsDescendants = true
 		module.Parent = children
 		addTooltip(module, modulesettings.Tooltip)
-		addCorner(module)
+		addCorner(module, UDim.new(0, 4))
+
+		local modulestroke = Instance.new('UIStroke')
+		modulestroke.Name = 'Stroke'
+		modulestroke.Color = legitTheme.Stroke
+		modulestroke.Thickness = 1
+		modulestroke.Transparency = 0.85
+		modulestroke.Parent = module
+
+		local moduleicon = Instance.new('ImageLabel')
+		moduleicon.Name = 'Icon'
+		moduleicon.Size = modulesettings.IconSize or UDim2.fromOffset(16, 16)
+		moduleicon.Position = modulesettings.IconPosition or UDim2.fromOffset(16, 14)
+		moduleicon.BackgroundTransparency = 1
+		moduleicon.Image = modulesettings.Icon or getcustomasset('vape/assets/new/legittab.png')
+		moduleicon.ImageColor3 = legitTheme.Muted
+		moduleicon.ImageTransparency = 0.2
+		moduleicon.Parent = module
+
 		local title = Instance.new('TextLabel')
 		title.Name = 'Title'
-		title.Size = UDim2.new(1, -16, 0, 20)
-		title.Position = UDim2.fromOffset(16, 81)
+		title.Size = UDim2.new(1, -28, 0, 22)
+		title.Position = UDim2.fromOffset(16, 79)
 		title.BackgroundTransparency = 1
 		title.Text = modulesettings.Name
 		title.TextXAlignment = Enum.TextXAlignment.Left
-		title.TextColor3 = color.Dark(uipallet.Text, 0.31)
-		title.TextSize = 13
+		title.TextColor3 = legitTheme.Muted
+		title.TextSize = 14
 		title.FontFace = uipallet.Font
+		title.TextTruncate = Enum.TextTruncate.AtEnd
 		title.Parent = module
+
 		local knob = Instance.new('Frame')
 		knob.Name = 'Knob'
 		knob.Size = UDim2.fromOffset(22, 12)
 		knob.Position = UDim2.new(1, -57, 0, 14)
-		knob.BackgroundColor3 = color.Light(uipallet.Main, 0.14)
+		knob.BackgroundColor3 = legitTheme.Off
+		knob.BorderSizePixel = 0
 		knob.Parent = module
 		addCorner(knob, UDim.new(1, 0))
-		local knobmain = knob:Clone()
+
+		local knobmain = Instance.new('Frame')
+		knobmain.Name = 'KnobMain'
 		knobmain.Size = UDim2.fromOffset(8, 8)
 		knobmain.Position = UDim2.fromOffset(2, 2)
-		knobmain.BackgroundColor3 = uipallet.Main
+		knobmain.BackgroundColor3 = legitTheme.Base
+		knobmain.BorderSizePixel = 0
 		knobmain.Parent = knob
+		addCorner(knobmain, UDim.new(1, 0))
+
 		local dotsbutton = Instance.new('TextButton')
 		dotsbutton.Name = 'Dots'
 		dotsbutton.Size = UDim2.fromOffset(14, 24)
 		dotsbutton.Position = UDim2.new(1, -27, 0, 8)
 		dotsbutton.BackgroundTransparency = 1
 		dotsbutton.Text = ''
+		dotsbutton.AutoButtonColor = false
 		dotsbutton.Parent = module
+
 		local dots = Instance.new('ImageLabel')
 		dots.Name = 'Dots'
 		dots.Size = UDim2.fromOffset(2, 12)
 		dots.Position = UDim2.fromOffset(6, 6)
 		dots.BackgroundTransparency = 1
 		dots.Image = getcustomasset('vape/assets/new/dots.png')
-		dots.ImageColor3 = color.Light(uipallet.Main, 0.37)
+		dots.ImageColor3 = legitTheme.MutedDark
 		dots.Parent = dotsbutton
+
 		local shadow = Instance.new('TextButton')
 		shadow.Name = 'Shadow'
-		shadow.Size = UDim2.new(1, 0, 1, -5)
+		shadow.Size = UDim2.new(1, 0, 1, 0)
 		shadow.BackgroundColor3 = Color3.new()
 		shadow.BackgroundTransparency = 1
 		shadow.AutoButtonColor = false
@@ -5059,48 +5771,63 @@ function mainapi:CreateLegit()
 		shadow.Visible = false
 		shadow.Text = ''
 		shadow.Parent = window
-		addCorner(shadow)
+		addCorner(shadow, UDim.new(0, 4))
+
 		local settingspane = Instance.new('TextButton')
-		settingspane.Size = UDim2.new(0, 220, 1, 0)
+		settingspane.Name = 'SettingsPane'
+		settingspane.Size = UDim2.new(0, 240, 1, 0)
 		settingspane.Position = UDim2.fromScale(1, 0)
-		settingspane.BackgroundColor3 = uipallet.Main
+		settingspane.BackgroundColor3 = legitTheme.Base
 		settingspane.AutoButtonColor = false
+		settingspane.BorderSizePixel = 0
 		settingspane.Text = ''
 		settingspane.Parent = shadow
+		addCorner(settingspane, UDim.new(0, 4))
+
+		local paneStroke = Instance.new('UIStroke')
+		paneStroke.Color = legitTheme.Stroke
+		paneStroke.Thickness = 1
+		paneStroke.Transparency = 0.65
+		paneStroke.Parent = settingspane
+
 		local settingstitle = Instance.new('TextLabel')
 		settingstitle.Name = 'Title'
-		settingstitle.Size = UDim2.new(1, -36, 0, 20)
-		settingstitle.Position = UDim2.fromOffset(36, 12)
+		settingstitle.Size = UDim2.new(1, -46, 0, 24)
+		settingstitle.Position = UDim2.fromOffset(38, 13)
 		settingstitle.BackgroundTransparency = 1
 		settingstitle.Text = modulesettings.Name
 		settingstitle.TextXAlignment = Enum.TextXAlignment.Left
-		settingstitle.TextColor3 = color.Dark(uipallet.Text, 0.16)
-		settingstitle.TextSize = 13
+		settingstitle.TextColor3 = legitTheme.Text
+		settingstitle.TextSize = 14
 		settingstitle.FontFace = uipallet.Font
 		settingstitle.Parent = settingspane
+
 		local back = Instance.new('ImageButton')
 		back.Name = 'Back'
-		back.Size = UDim2.fromOffset(16, 16)
-		back.Position = UDim2.fromOffset(11, 13)
+		back.Size = UDim2.fromOffset(18, 18)
+		back.Position = UDim2.fromOffset(12, 15)
 		back.BackgroundTransparency = 1
+		back.AutoButtonColor = false
 		back.Image = getcustomasset('vape/assets/new/back.png')
-		back.ImageColor3 = color.Light(uipallet.Main, 0.37)
+		back.ImageColor3 = legitTheme.Muted
 		back.Parent = settingspane
-		addCorner(settingspane)
+
 		local settingschildren = Instance.new('ScrollingFrame')
 		settingschildren.Name = 'Children'
-		settingschildren.Size = UDim2.new(1, 0, 1, -45)
-		settingschildren.Position = UDim2.fromOffset(0, 41)
-		settingschildren.BackgroundColor3 = uipallet.Main
+		settingschildren.Size = UDim2.new(1, 0, 1, -48)
+		settingschildren.Position = UDim2.fromOffset(0, 48)
+		settingschildren.BackgroundColor3 = legitTheme.Base
 		settingschildren.BorderSizePixel = 0
 		settingschildren.ScrollBarThickness = 2
-		settingschildren.ScrollBarImageTransparency = 0.75
+		settingschildren.ScrollBarImageTransparency = 0.65
 		settingschildren.CanvasSize = UDim2.new()
 		settingschildren.Parent = settingspane
+
 		local settingswindowlist = Instance.new('UIListLayout')
 		settingswindowlist.SortOrder = Enum.SortOrder.LayoutOrder
 		settingswindowlist.HorizontalAlignment = Enum.HorizontalAlignment.Center
 		settingswindowlist.Parent = settingschildren
+
 		if modulesettings.Size then
 			local modulechildren = Instance.new('Frame')
 			modulechildren.Size = modulesettings.Size
@@ -5109,12 +5836,13 @@ function mainapi:CreateLegit()
 			modulechildren.Parent = scaledgui
 			makeDraggable(modulechildren, window)
 			local objectstroke = Instance.new('UIStroke')
-			objectstroke.Color = Color3.fromRGB(5, 134, 105)
+			objectstroke.Color = accent()
 			objectstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 			objectstroke.Thickness = 0
 			objectstroke.Parent = modulechildren
 			moduleapi.Children = modulechildren
 		end
+
 		modulesettings.Function = modulesettings.Function or function() end
 		addMaid(moduleapi)
 
@@ -5123,85 +5851,67 @@ function mainapi:CreateLegit()
 			if moduleapi.Children then
 				moduleapi.Children.Visible = moduleapi.Enabled
 			end
-			title.TextColor3 = moduleapi.Enabled and color.Light(uipallet.Text, 0.2) or color.Dark(uipallet.Text, 0.31)
-			module.BackgroundColor3 = moduleapi.Enabled and color.Light(uipallet.Main, 0.05) or module.BackgroundColor3
+			local enabled = moduleapi.Enabled
+			tween:Tween(module, uipallet.Tween, {
+				BackgroundColor3 = enabled and legitTheme.CardEnabled or legitTheme.Card
+			})
+			modulestroke.Transparency = enabled and 0.45 or 0.85
+			modulestroke.Color = enabled and accent() or legitTheme.Stroke
+			title.TextColor3 = enabled and legitTheme.Text or legitTheme.Muted
+			moduleicon.ImageColor3 = enabled and accent() or legitTheme.Muted
+			moduleicon.ImageTransparency = enabled and 0 or 0.2
 			tween:Tween(knob, uipallet.Tween, {
-				BackgroundColor3 = moduleapi.Enabled and Color3.fromHSV(mainapi.GUIColor.Hue, mainapi.GUIColor.Sat, mainapi.GUIColor.Value) or color.Light(uipallet.Main, 0.14)
+				BackgroundColor3 = enabled and accent() or legitTheme.Off
 			})
 			tween:Tween(knobmain, uipallet.Tween, {
-				Position = UDim2.fromOffset(moduleapi.Enabled and 12 or 2, 2)
+				Position = UDim2.fromOffset(enabled and 12 or 2, 2),
+				BackgroundColor3 = enabled and Color3.fromRGB(31, 31, 33) or legitTheme.Base
 			})
-			if not moduleapi.Enabled then
+			if not enabled then
 				for _, v in moduleapi.Connections do
 					v:Disconnect()
 				end
 				table.clear(moduleapi.Connections)
 			end
-			task.spawn(modulesettings.Function, moduleapi.Enabled)
+			task.spawn(modulesettings.Function, enabled)
 		end
 
 		back.MouseEnter:Connect(function()
-			back.ImageColor3 = uipallet.Text
+			back.ImageColor3 = legitTheme.Text
 		end)
 		back.MouseLeave:Connect(function()
-			back.ImageColor3 = color.Light(uipallet.Main, 0.37)
+			back.ImageColor3 = legitTheme.Muted
 		end)
 		back.MouseButton1Click:Connect(function()
-			tween:Tween(shadow, uipallet.Tween, {
-				BackgroundTransparency = 1
-			})
-			tween:Tween(settingspane, uipallet.Tween, {
-				Position = UDim2.fromScale(1, 0)
-			})
-			task.wait(0.2)
-			shadow.Visible = false
+			closeSettings(shadow, settingspane)
 		end)
 		dotsbutton.MouseButton1Click:Connect(function()
-			shadow.Visible = true
-			tween:Tween(shadow, uipallet.Tween, {
-				BackgroundTransparency = 0.5
-			})
-			tween:Tween(settingspane, uipallet.Tween, {
-				Position = UDim2.new(1, -220, 0, 0)
-			})
+			openSettings(shadow, settingspane)
 		end)
 		dotsbutton.MouseEnter:Connect(function()
-			dots.ImageColor3 = uipallet.Text
+			dots.ImageColor3 = legitTheme.Text
 		end)
 		dotsbutton.MouseLeave:Connect(function()
-			dots.ImageColor3 = color.Light(uipallet.Main, 0.37)
+			dots.ImageColor3 = legitTheme.MutedDark
 		end)
 		module.MouseEnter:Connect(function()
 			if not moduleapi.Enabled then
-				module.BackgroundColor3 = color.Light(uipallet.Main, 0.05)
+				tween:Tween(module, uipallet.Tween, {BackgroundColor3 = legitTheme.CardHover})
 			end
 		end)
 		module.MouseLeave:Connect(function()
 			if not moduleapi.Enabled then
-				module.BackgroundColor3 = color.Light(uipallet.Main, 0.02)
+				tween:Tween(module, uipallet.Tween, {BackgroundColor3 = legitTheme.Card})
 			end
 		end)
 		module.MouseButton1Click:Connect(function()
 			moduleapi:Toggle()
 		end)
 		module.MouseButton2Click:Connect(function()
-			shadow.Visible = true
-			tween:Tween(shadow, uipallet.Tween, {
-				BackgroundTransparency = 0.5
-			})
-			tween:Tween(settingspane, uipallet.Tween, {
-				Position = UDim2.new(1, -220, 0, 0)
-			})
+			openSettings(shadow, settingspane)
 		end)
 		shadow.MouseButton1Click:Connect(function()
-			tween:Tween(shadow, uipallet.Tween, {
-				BackgroundTransparency = 1
-			})
-			tween:Tween(settingspane, uipallet.Tween, {
-				Position = UDim2.fromScale(1, 0)
-			})
-			task.wait(0.2)
-			shadow.Visible = false
+			closeSettings(shadow, settingspane)
 		end)
 		settingswindowlist:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
 			if mainapi.ThreadFix then
@@ -5229,6 +5939,7 @@ function mainapi:CreateLegit()
 			legitapi.Modules[v].Object.LayoutOrder = i
 		end
 
+		legitapi:Filter()
 		return moduleapi
 	end
 
@@ -5244,6 +5955,12 @@ function mainapi:CreateLegit()
 		end
 	end
 
+	settingsTop.MouseButton1Click:Connect(function()
+		legitapi.CurrentTab = 'ALL'
+		search.Text = ''
+		legitapi:UpdateTabs()
+		legitapi:Filter()
+	end)
 	close.MouseButton1Click:Connect(function()
 		window.Visible = false
 		clickgui.Visible = true
@@ -6877,7 +7594,11 @@ function mainapi:UpdateGUI(hue, sat, val, default)
 		end
 
 		if v.Type == 'CategoryList' then
-			v.Object.Children.Add.AddButton.ImageColor3 = rainbow and Color3.fromHSV(mainapi:Color(hue % 1)) or Color3.fromHSV(hue, sat, val)
+			local addholder = v.Object.Children:FindFirstChild('Add', true)
+			local addimage = addholder and addholder:FindFirstChild('AddButton')
+			if addimage then
+				addimage.ImageColor3 = rainbow and Color3.fromHSV(mainapi:Color(hue % 1)) or Color3.fromHSV(hue, sat, val)
+			end
 			if v.Selected then
 				v.Selected.BackgroundColor3 = rainbow and Color3.fromHSV(mainapi:Color(hue % 1)) or Color3.fromHSV(hue, sat, val)
 				v.Selected.Title.TextColor3 = mainapi.GUIColor.Rainbow and Color3.new(0.19, 0.19, 0.19) or mainapi:TextColor(hue, sat, val)
