@@ -1,9 +1,20 @@
 repeat task.wait() until game:IsLoaded()
 if shared.vape then shared.vape:Uninject() end
 
+-- FINAL DEBUG LOADER:
+-- Does NOT use vape/profiles/commit.txt for downloads.
+-- It pulls from amrho94/Vape/main so your newest GitHub upload is actually used.
+pcall(function()
+	if isfile and isfile('vape/guis/new.lua') then
+		delfile('vape/guis/new.lua')
+	end
+end)
+
 local vape
+local RAW_BASE = 'https://raw.githubusercontent.com/amrho94/Vape/main/'
 
 local real_loadstring = loadstring
+
 local function compileChunk(source, chunkName)
 	local fn, err = real_loadstring(source, chunkName)
 	if not fn then
@@ -57,11 +68,19 @@ local function ensureFolder(path)
 end
 
 local function downloadFile(path, func)
-	if not isfile(path) then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/amrho94/Vape/'..readfile('vape/profiles/commit.txt')..'/'..select(1, path:gsub('vape/', '')), true)
+	local shouldRefresh = path:find('vape/guis/', 1, true) and path:sub(-4) == '.lua'
+	if shouldRefresh and isfile(path) then
+		pcall(function()
+			delfile(path)
 		end)
-		if not suc or res == '404: Not Found' then
+	end
+
+	if not isfile(path) then
+		local rawPath = select(1, path:gsub('vape/', ''))
+		local suc, res = pcall(function()
+			return game:HttpGet(RAW_BASE..rawPath, true)
+		end)
+		if not suc or res == '404: Not Found' or type(res) ~= 'string' or res == '' then
 			error(res)
 		end
 		if path:find('.lua') then
@@ -69,6 +88,7 @@ local function downloadFile(path, func)
 		end
 		writefile(path, res)
 	end
+
 	return (func or readfile)(path)
 end
 
@@ -92,7 +112,7 @@ local function finishLoading()
 				if shared.VapeDeveloper then
 					loadstring(readfile('vape/loader.lua'), 'loader')()
 				else
-					loadstring(game:HttpGet('https://raw.githubusercontent.com/amrho94/Vape/'..readfile('vape/profiles/commit.txt')..'/loader.lua', true), 'loader')()
+					loadstring(game:HttpGet('https://raw.githubusercontent.com/amrho94/Vape/main/loader.lua', true), 'loader')()
 				end
 			]]
 
@@ -124,20 +144,16 @@ end
 ensureFolder('vape')
 ensureFolder('vape/profiles')
 ensureFolder('vape/assets')
+ensureFolder('vape/guis')
+ensureFolder('vape/games')
 
 if not isfile('vape/profiles/gui.txt') then
 	writefile('vape/profiles/gui.txt', 'new')
 end
 
 local gui = readfile('vape/profiles/gui.txt')
-
 ensureFolder('vape/assets/'..gui)
 
--- IMPORTANT:
--- The old version did this:
--- vape = loadstring(downloadFile('vape/guis/'..gui..'.lua'), 'gui')()
--- If the GUI has a syntax error, loadstring returns nil, then nil() crashes at line 90.
--- This version shows the REAL GUI error instead.
 local guiSource = downloadFile('vape/guis/'..gui..'.lua')
 vape = runChunk(guiSource, 'gui')
 shared.vape = vape
@@ -150,11 +166,11 @@ if not shared.VapeIndependent then
 	else
 		if not shared.VapeDeveloper then
 			local suc, res = pcall(function()
-				return game:HttpGet('https://raw.githubusercontent.com/amrho94/Vape/'..readfile('vape/profiles/commit.txt')..'/games/'..game.PlaceId..'.lua', true)
+				return game:HttpGet(RAW_BASE..'games/'..game.PlaceId..'.lua', true)
 			end)
 			if suc and res ~= '404: Not Found' then
-				downloadFile('vape/games/'..game.PlaceId..'.lua')
-				runChunk(readfile('vape/games/'..game.PlaceId..'.lua'), tostring(game.PlaceId), ...)
+				writefile('vape/games/'..game.PlaceId..'.lua', res)
+				runChunk(res, tostring(game.PlaceId), ...)
 			end
 		end
 	end
