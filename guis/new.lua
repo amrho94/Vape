@@ -493,11 +493,6 @@ mainapi.Libraries = {
 	uipallet = uipallet,
 }
 
--- Default UI context used by shared components/main settings pane.
--- Some component code checks categorysettings.Profiles even when it is not
--- being created inside a category window, so this prevents nil indexing.
-local categorysettings = {Profiles = false}
-
 local components
 components = {
 	Button = function(optionsettings, children, api)
@@ -2470,6 +2465,7 @@ end
 addMaid(mainapi)
 
 function mainapi:CreateGUI()
+	local categorysettings = {Profiles = false}
 	local categoryapi = {
 		Type = 'MainWindow',
 		Buttons = {},
@@ -4851,90 +4847,250 @@ function mainapi:CreateCategoryList(categorysettings)
 			'https://amrho94.github.io/profiles/profiles.json',
 			'https://amrho94.github.io/profiles.json'
 		}
-		local publicWindow = Instance.new('TextButton')
-		publicWindow.Name = 'PublicProfilesWindow'
-		publicWindow.Size = UDim2.fromOffset(300, 316)
-		publicWindow.Position = UDim2.fromOffset(window.Position.X.Offset + 230, window.Position.Y.Offset)
-		publicWindow.BackgroundColor3 = Color3.fromRGB(17, 17, 19)
-		publicWindow.AutoButtonColor = false
+
+		local standaloneTheme = {
+			Base = Color3.fromRGB(18, 18, 20),
+			Top = Color3.fromRGB(18, 18, 20),
+			Sidebar = Color3.fromRGB(18, 18, 20),
+			Panel = Color3.fromRGB(23, 23, 26),
+			Card = Color3.fromRGB(25, 25, 28),
+			CardHover = Color3.fromRGB(31, 31, 35),
+			Search = Color3.fromRGB(15, 15, 17),
+			Stroke = Color3.fromRGB(44, 44, 49),
+			Text = Color3.fromRGB(232, 232, 236),
+			Muted = Color3.fromRGB(138, 138, 145),
+			MutedDark = Color3.fromRGB(94, 94, 100),
+			Badge = Color3.fromRGB(50, 50, 56)
+		}
+
+		local function publicAccent()
+			return Color3.fromHSV(mainapi.GUIColor.Hue, mainapi.GUIColor.Sat, mainapi.GUIColor.Value)
+		end
+
+		local publicWindow = Instance.new('Frame')
+		publicWindow.Name = 'PublicProfilesGUI'
+		publicWindow.Size = UDim2.fromOffset(706, 430)
+		publicWindow.Position = UDim2.new(0.5, -353, 0.5, -215)
+		publicWindow.BackgroundColor3 = standaloneTheme.Base
+		publicWindow.BorderSizePixel = 0
 		publicWindow.Visible = false
-		publicWindow.Text = ''
-		publicWindow.Parent = clickgui
+		publicWindow.ClipsDescendants = true
+		publicWindow.Parent = scaledgui
 		addBlur(publicWindow)
 		addCorner(publicWindow, UDim.new(0, 4))
 		makeDraggable(publicWindow)
+		table.insert(mainapi.Windows, publicWindow)
+
+		local publicOutline = Instance.new('UIStroke')
+		publicOutline.Color = Color3.fromRGB(10, 10, 12)
+		publicOutline.Thickness = 1
+		publicOutline.Transparency = 0.15
+		publicOutline.Parent = publicWindow
+
+		local sidebar = Instance.new('Frame')
+		sidebar.Name = 'Sidebar'
+		sidebar.Size = UDim2.fromOffset(188, 430)
+		sidebar.BackgroundColor3 = standaloneTheme.Sidebar
+		sidebar.BorderSizePixel = 0
+		sidebar.Parent = publicWindow
+
+		local topbar = Instance.new('Frame')
+		topbar.Name = 'TopBar'
+		topbar.Size = UDim2.new(1, 0, 0, 41)
+		topbar.BackgroundTransparency = 1
+		topbar.Parent = publicWindow
+
+		local titleIcon = Instance.new('ImageLabel')
+		titleIcon.Name = 'TitleIcon'
+		titleIcon.Size = UDim2.fromOffset(15, 15)
+		titleIcon.Position = UDim2.fromOffset(14, 13)
+		titleIcon.BackgroundTransparency = 1
+		titleIcon.Image = getcustomasset('vape/assets/new/profilesicon.png')
+		titleIcon.ImageColor3 = standaloneTheme.Text
+		titleIcon.Parent = topbar
 
 		local publicTitle = Instance.new('TextLabel')
 		publicTitle.Name = 'Title'
-		publicTitle.Size = UDim2.new(1, -56, 0, 40)
-		publicTitle.Position = UDim2.fromOffset(14, 0)
+		publicTitle.Size = UDim2.new(1, -70, 0, 24)
+		publicTitle.Position = UDim2.fromOffset(35, 9)
 		publicTitle.BackgroundTransparency = 1
-		publicTitle.Text = 'Public profiles'
+		publicTitle.Text = 'Public Profiles'
 		publicTitle.TextXAlignment = Enum.TextXAlignment.Left
-		publicTitle.TextColor3 = uipallet.Text
+		publicTitle.TextColor3 = standaloneTheme.Text
 		publicTitle.TextSize = 14
 		publicTitle.FontFace = uipallet.Font
-		publicTitle.Parent = publicWindow
+		publicTitle.Parent = topbar
 
-		local publicClose = addCloseButton(publicWindow, 8)
+		local publicClose = Instance.new('ImageButton')
+		publicClose.Name = 'Close'
+		publicClose.Size = UDim2.fromOffset(24, 24)
+		publicClose.Position = UDim2.new(1, -14, 0, 8)
+		publicClose.AnchorPoint = Vector2.new(1, 0)
+		publicClose.BackgroundTransparency = 1
+		publicClose.AutoButtonColor = false
+		publicClose.Image = getcustomasset('vape/assets/new/close.png')
+		publicClose.ImageColor3 = standaloneTheme.Muted
+		publicClose.Parent = topbar
+		publicClose.MouseEnter:Connect(function()
+			publicClose.ImageColor3 = standaloneTheme.Text
+		end)
+		publicClose.MouseLeave:Connect(function()
+			publicClose.ImageColor3 = standaloneTheme.Muted
+		end)
 		publicClose.MouseButton1Click:Connect(function()
 			publicWindow.Visible = false
 		end)
 
-		local apiLabel = Instance.new('TextLabel')
-		apiLabel.Name = 'ApiLabel'
-		apiLabel.Size = UDim2.new(1, -28, 0, 18)
-		apiLabel.Position = UDim2.fromOffset(14, 39)
-		apiLabel.BackgroundTransparency = 1
-		apiLabel.Text = publicProfilesApi:gsub('https://', ''):gsub('http://', '')
-		apiLabel.TextXAlignment = Enum.TextXAlignment.Left
-		apiLabel.TextColor3 = Color3.fromRGB(120, 120, 126)
-		apiLabel.TextSize = 10
-		apiLabel.FontFace = uipallet.Font
-		apiLabel.Parent = publicWindow
+		local headerLine = Instance.new('Frame')
+		headerLine.Size = UDim2.new(1, 0, 0, 1)
+		headerLine.Position = UDim2.fromOffset(0, 40)
+		headerLine.BackgroundColor3 = standaloneTheme.Stroke
+		headerLine.BackgroundTransparency = 0.3
+		headerLine.BorderSizePixel = 0
+		headerLine.Parent = publicWindow
+
+		local sidebarLabel = Instance.new('TextLabel')
+		sidebarLabel.Size = UDim2.new(1, -24, 0, 20)
+		sidebarLabel.Position = UDim2.fromOffset(12, 52)
+		sidebarLabel.BackgroundTransparency = 1
+		sidebarLabel.Text = 'YOUR PUBLIC PROFILES'
+		sidebarLabel.TextXAlignment = Enum.TextXAlignment.Left
+		sidebarLabel.TextColor3 = standaloneTheme.MutedDark
+		sidebarLabel.TextSize = 11
+		sidebarLabel.FontFace = uipallet.FontSemiBold
+		sidebarLabel.Parent = sidebar
+
+		local createNew = Instance.new('TextButton')
+		createNew.Name = 'CreateNew'
+		createNew.Size = UDim2.fromOffset(152, 26)
+		createNew.Position = UDim2.fromOffset(14, 76)
+		createNew.BackgroundColor3 = publicAccent()
+		createNew.BorderSizePixel = 0
+		createNew.AutoButtonColor = false
+		createNew.Text = 'CREATE NEW'
+		createNew.TextColor3 = Color3.fromRGB(245, 245, 247)
+		createNew.TextSize = 11
+		createNew.FontFace = uipallet.FontSemiBold
+		createNew.Parent = sidebar
+		addCorner(createNew, UDim.new(0, 4))
+
+		local yourList = Instance.new('ScrollingFrame')
+		yourList.Name = 'YourProfiles'
+		yourList.Size = UDim2.new(1, -24, 1, -118)
+		yourList.Position = UDim2.fromOffset(12, 112)
+		yourList.BackgroundTransparency = 1
+		yourList.BorderSizePixel = 0
+		yourList.ScrollBarThickness = 0
+		yourList.CanvasSize = UDim2.new()
+		yourList.Parent = sidebar
+		local yourLayout = Instance.new('UIListLayout')
+		yourLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		yourLayout.Padding = UDim.new(0, 6)
+		yourLayout.Parent = yourList
+
+		local allLabel = Instance.new('TextLabel')
+		allLabel.Size = UDim2.new(0, 160, 0, 20)
+		allLabel.Position = UDim2.fromOffset(219, 52)
+		allLabel.BackgroundTransparency = 1
+		allLabel.Text = 'ALL PUBLIC PROFILES'
+		allLabel.TextXAlignment = Enum.TextXAlignment.Left
+		allLabel.TextColor3 = standaloneTheme.MutedDark
+		allLabel.TextSize = 11
+		allLabel.FontFace = uipallet.FontSemiBold
+		allLabel.Parent = publicWindow
 
 		local searchBkg = Instance.new('Frame')
 		searchBkg.Name = 'Search'
-		searchBkg.Size = UDim2.new(1, -28, 0, 30)
-		searchBkg.Position = UDim2.fromOffset(14, 63)
-		searchBkg.BackgroundColor3 = Color3.fromRGB(21, 21, 24)
+		searchBkg.Size = UDim2.fromOffset(479, 40)
+		searchBkg.Position = UDim2.fromOffset(219, 76)
+		searchBkg.BackgroundColor3 = standaloneTheme.Search
+		searchBkg.BorderSizePixel = 0
 		searchBkg.Parent = publicWindow
-		addCorner(searchBkg, UDim.new(0, 3))
+		addCorner(searchBkg, UDim.new(0, 4))
 		local searchStroke = Instance.new('UIStroke')
-		searchStroke.Color = Color3.fromRGB(34, 34, 38)
-		searchStroke.Transparency = 0.15
-		searchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		searchStroke.Color = standaloneTheme.Stroke
+		searchStroke.Thickness = 1
+		searchStroke.Transparency = 0.35
 		searchStroke.Parent = searchBkg
+
+		local searchIcon = Instance.new('ImageLabel')
+		searchIcon.Name = 'Icon'
+		searchIcon.Size = UDim2.fromOffset(14, 14)
+		searchIcon.Position = UDim2.fromOffset(11, 13)
+		searchIcon.BackgroundTransparency = 1
+		searchIcon.Image = getcustomasset('vape/assets/new/search.png')
+		searchIcon.ImageColor3 = standaloneTheme.Muted
+		searchIcon.ImageTransparency = 0.05
+		searchIcon.Parent = searchBkg
+
 		local searchBox = Instance.new('TextBox')
 		searchBox.Name = 'TextBox'
-		searchBox.Size = UDim2.new(1, -20, 1, 0)
-		searchBox.Position = UDim2.fromOffset(10, 0)
+		searchBox.Size = UDim2.new(1, -36, 1, 0)
+		searchBox.Position = UDim2.fromOffset(36, 0)
 		searchBox.BackgroundTransparency = 1
 		searchBox.ClearTextOnFocus = false
-		searchBox.PlaceholderText = 'Search public profiles'
-		searchBox.PlaceholderColor3 = Color3.fromRGB(115, 115, 120)
+		searchBox.PlaceholderText = 'Search Profile / Share Code'
+		searchBox.PlaceholderColor3 = standaloneTheme.Muted
 		searchBox.Text = ''
 		searchBox.TextXAlignment = Enum.TextXAlignment.Left
-		searchBox.TextColor3 = Color3.fromRGB(225, 225, 230)
+		searchBox.TextColor3 = standaloneTheme.Text
 		searchBox.TextSize = 12
 		searchBox.FontFace = uipallet.Font
 		searchBox.Parent = searchBkg
 
+		local selectedSort = 'TOP RATED'
+		local sortButtons = {}
+		local loadedPublicProfiles = {}
+		local renderPublicProfiles
+		local function createSortButton(text, x, w)
+			local button = Instance.new('TextButton')
+			button.Name = text
+			button.Size = UDim2.fromOffset(w, 30)
+			button.Position = UDim2.fromOffset(x, 126)
+			button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+			button.BackgroundTransparency = 1
+			button.BorderSizePixel = 0
+			button.AutoButtonColor = false
+			button.Text = text
+			button.TextSize = 11
+			button.FontFace = uipallet.FontSemiBold
+			button.Parent = publicWindow
+			addCorner(button, UDim.new(0, 14))
+			sortButtons[text] = button
+			button.MouseButton1Click:Connect(function()
+				selectedSort = text
+				for name, obj in sortButtons do
+					local active = name == selectedSort
+					obj.BackgroundTransparency = active and 0 or 1
+					obj.BackgroundColor3 = active and publicAccent() or Color3.fromRGB(0, 0, 0)
+					obj.TextColor3 = active and Color3.fromRGB(244, 244, 246) or standaloneTheme.MutedDark
+				end
+				if renderPublicProfiles then renderPublicProfiles() end
+			end)
+			return button
+		end
+		createSortButton('TOP RATED', 219, 87)
+		createSortButton('MOST DOWNLOADED', 312, 129)
+		createSortButton('NEWEST', 448, 70)
+
 		local publicList = Instance.new('ScrollingFrame')
 		publicList.Name = 'List'
-		publicList.Size = UDim2.new(1, -28, 1, -108)
-		publicList.Position = UDim2.fromOffset(14, 100)
+		publicList.Size = UDim2.fromOffset(479, 256)
+		publicList.Position = UDim2.fromOffset(219, 164)
 		publicList.BackgroundTransparency = 1
 		publicList.BorderSizePixel = 0
-		publicList.ScrollBarThickness = 0
+		publicList.ScrollBarThickness = 2
+		publicList.ScrollBarImageColor3 = Color3.fromRGB(85, 85, 90)
+		publicList.ScrollBarImageTransparency = 0.45
 		publicList.CanvasSize = UDim2.new()
 		publicList.Parent = publicWindow
-		local publicLayout = Instance.new('UIListLayout')
+		local publicLayout = Instance.new('UIGridLayout')
 		publicLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		publicLayout.Padding = UDim.new(0, 7)
+		publicLayout.FillDirectionMaxCells = 3
+		publicLayout.CellSize = UDim2.fromOffset(151, 140)
+		publicLayout.CellPadding = UDim2.fromOffset(9, 8)
 		publicLayout.Parent = publicList
 
-		local loadedPublicProfiles = {}
 
 		local function safeProfileName(name)
 			name = tostring(name or ''):gsub('^%s+', ''):gsub('%s+$', '')
@@ -4942,28 +5098,12 @@ function mainapi:CreateCategoryList(categorysettings)
 			return name:sub(1, 32)
 		end
 
-		local function clearPublicList()
-			for _, obj in publicList:GetChildren() do
-				if obj ~= publicLayout then
+		local function clearContainer(container, preserve)
+			for _, obj in container:GetChildren() do
+				if obj ~= preserve then
 					obj:Destroy()
 				end
 			end
-		end
-
-		local function createStatusRow(text)
-			clearPublicList()
-			local row = Instance.new('TextLabel')
-			row.Name = 'Status'
-			row.Size = UDim2.new(1, 0, 0, 36)
-			row.BackgroundColor3 = Color3.fromRGB(22, 22, 24)
-			row.BorderSizePixel = 0
-			row.Text = text
-			row.TextColor3 = Color3.fromRGB(145, 145, 150)
-			row.TextSize = 12
-			row.FontFace = uipallet.Font
-			row.Parent = publicList
-			addCorner(row, UDim.new(0, 3))
-			publicList.CanvasSize = UDim2.fromOffset(0, 43)
 		end
 
 		local function normalizePublicProfiles(raw)
@@ -4994,7 +5134,7 @@ function mainapi:CreateCategoryList(categorysettings)
 		local function importPublicProfile(entry, label)
 			local profileName = safeProfileName(entry.Name or entry.name or entry.title or entry.Title)
 			if profileName == '' then
-				label.Text = 'Invalid profile name'
+				if label then label.Text = 'Invalid profile name' end
 				return
 			end
 
@@ -5002,7 +5142,7 @@ function mainapi:CreateCategoryList(categorysettings)
 			if not payload then
 				local url = entry.Url or entry.URL or entry.url or entry.RawUrl or entry.rawUrl or entry.File or entry.file
 				if type(url) ~= 'string' or url == '' then
-					label.Text = 'API entry has no file URL'
+					if label then label.Text = 'API entry has no file URL' end
 					return
 				end
 				local urlsToTry = {url}
@@ -5011,7 +5151,6 @@ function mainapi:CreateCategoryList(categorysettings)
 				elseif url:sub(1, 7) == 'http://' then
 					table.insert(urlsToTry, 'https://'..url:sub(8))
 				end
-
 				local downloaded
 				for _, profileUrl in urlsToTry do
 					local ok, result = pcall(function()
@@ -5023,7 +5162,7 @@ function mainapi:CreateCategoryList(categorysettings)
 					end
 				end
 				if not downloaded then
-					label.Text = 'Failed to download profile'
+					if label then label.Text = 'Failed to download profile' end
 					return
 				end
 				payload = downloaded
@@ -5036,12 +5175,12 @@ function mainapi:CreateCategoryList(categorysettings)
 				return httpService:JSONDecode(payload)
 			end)
 			if not okDecode or type(decoded) ~= 'table' then
-				label.Text = 'Profile is not valid JSON'
+				if label then label.Text = 'Profile is not valid JSON' end
 				return
 			end
 
 			if not writefile then
-				label.Text = 'Executor is missing writefile'
+				if label then label.Text = 'Executor is missing writefile' end
 				return
 			end
 			writefile('vape/profiles/'..profileName..mainapi.Place..'.txt', payload)
@@ -5050,104 +5189,226 @@ function mainapi:CreateCategoryList(categorysettings)
 			end
 			mainapi:Save(profileName)
 			mainapi:Load(true)
+			if label then label.Text = 'Imported' end
 			publicWindow.Visible = false
 		end
 
-		local function renderPublicProfiles()
-			clearPublicList()
-			local query = searchBox.Text:lower()
-			local shown = 0
-			for _, entry in loadedPublicProfiles do
-				local name = tostring(entry.Name or entry.name or entry.title or entry.Title or 'Unnamed')
-				local author = tostring(entry.Author or entry.author or entry.Creator or entry.creator or 'Public profile')
-				local desc = tostring(entry.Description or entry.description or entry.Game or entry.game or author)
-				if query ~= '' and not (name:lower():find(query, 1, true) or desc:lower():find(query, 1, true) or author:lower():find(query, 1, true)) then
-					continue
-				end
-				shown += 1
-
+		local function refreshYourProfiles()
+			clearContainer(yourList, yourLayout)
+			local count = 0
+			for _, profile in mainapi.Profiles do
+				count += 1
 				local row = Instance.new('TextButton')
-				row.Name = safeProfileName(name) ~= '' and safeProfileName(name) or 'PublicProfile'
-				row.Size = UDim2.new(1, 0, 0, 52)
-				row.BackgroundColor3 = Color3.fromRGB(22, 22, 24)
+				row.Name = safeProfileName(profile.Name) ~= '' and safeProfileName(profile.Name) or ('Profile'..count)
+				row.Size = UDim2.new(1, 0, 0, 31)
+				row.BackgroundColor3 = profile.Name == mainapi.Profile and publicAccent() or Color3.fromRGB(22, 22, 24)
 				row.BorderSizePixel = 0
 				row.AutoButtonColor = false
 				row.Text = ''
-				row.Parent = publicList
+				row.Parent = yourList
 				addCorner(row, UDim.new(0, 3))
 				local rowStroke = Instance.new('UIStroke')
 				rowStroke.Color = Color3.fromRGB(38, 38, 42)
 				rowStroke.Transparency = 0.35
-				rowStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 				rowStroke.Parent = row
+				local rowName = Instance.new('TextLabel')
+				rowName.Size = UDim2.new(1, -32, 1, 0)
+				rowName.Position = UDim2.fromOffset(10, 0)
+				rowName.BackgroundTransparency = 1
+				rowName.Text = profile.Name
+				rowName.TextXAlignment = Enum.TextXAlignment.Left
+				rowName.TextColor3 = profile.Name == mainapi.Profile and Color3.fromRGB(245, 245, 247) or Color3.fromRGB(175, 175, 180)
+				rowName.TextSize = 12
+				rowName.FontFace = uipallet.Font
+				rowName.Parent = row
+				local dots = Instance.new('ImageLabel')
+				dots.Size = UDim2.fromOffset(2, 12)
+				dots.Position = UDim2.new(1, -12, 0, 9)
+				dots.BackgroundTransparency = 1
+				dots.Image = getcustomasset('vape/assets/new/dots.png')
+				dots.ImageColor3 = profile.Name == mainapi.Profile and Color3.fromRGB(245, 245, 247) or standaloneTheme.MutedDark
+				dots.Parent = row
+				row.MouseButton1Click:Connect(function()
+					mainapi:Save(profile.Name)
+					mainapi:Load(true)
+					refreshYourProfiles()
+				end)
+			end
+			if count == 0 then
+				local empty = Instance.new('TextLabel')
+				empty.Size = UDim2.new(1, 0, 0, 24)
+				empty.BackgroundTransparency = 1
+				empty.Text = 'No local profiles yet.'
+				empty.TextColor3 = standaloneTheme.MutedDark
+				empty.TextSize = 11
+				empty.FontFace = uipallet.Font
+				empty.Parent = yourList
+			end
+			yourList.CanvasSize = UDim2.fromOffset(0, yourLayout.AbsoluteContentSize.Y / scale.Scale + 4)
+		end
 
-				local nameLabel = Instance.new('TextLabel')
-				nameLabel.Name = 'Name'
-				nameLabel.Size = UDim2.new(1, -74, 0, 21)
-				nameLabel.Position = UDim2.fromOffset(11, 7)
-				nameLabel.BackgroundTransparency = 1
-				nameLabel.Text = name
-				nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-				nameLabel.TextColor3 = Color3.fromRGB(230, 230, 235)
-				nameLabel.TextSize = 13
-				nameLabel.FontFace = uipallet.Font
-				nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-				nameLabel.Parent = row
+		local function entryValue(entry, keys)
+			for _, key in keys do
+				local v = entry[key]
+				if v ~= nil then
+					return tonumber(v) or 0
+				end
+			end
+			return 0
+		end
 
-				local descLabel = Instance.new('TextLabel')
-				descLabel.Name = 'Description'
-				descLabel.Size = UDim2.new(1, -74, 0, 17)
-				descLabel.Position = UDim2.fromOffset(11, 28)
-				descLabel.BackgroundTransparency = 1
-				descLabel.Text = desc
-				descLabel.TextXAlignment = Enum.TextXAlignment.Left
-				descLabel.TextColor3 = Color3.fromRGB(130, 130, 136)
-				descLabel.TextSize = 10
-				descLabel.FontFace = uipallet.Font
-				descLabel.TextTruncate = Enum.TextTruncate.AtEnd
-				descLabel.Parent = row
+		renderPublicProfiles = function()
+			clearContainer(publicList, publicLayout)
+			local query = searchBox.Text:lower()
+			local filtered = {}
+			for _, entry in loadedPublicProfiles do
+				local name = tostring(entry.Name or entry.name or entry.title or entry.Title or 'Unnamed')
+				local author = tostring(entry.Author or entry.author or entry.Creator or entry.creator or 'Public profile')
+				local desc = tostring(entry.Description or entry.description or entry.Game or entry.game or author)
+				if query == '' or name:lower():find(query, 1, true) or desc:lower():find(query, 1, true) or author:lower():find(query, 1, true) then
+					table.insert(filtered, {
+						Raw = entry,
+						Name = name,
+						Author = author,
+						Description = desc,
+						Likes = entryValue(entry, {'Likes', 'likes', 'Rating', 'rating', 'Votes', 'votes'}),
+						Downloads = entryValue(entry, {'Downloads', 'downloads', 'Installs', 'installs', 'Uses', 'uses'}),
+						Created = entryValue(entry, {'Created', 'created', 'Timestamp', 'timestamp', 'Date', 'date'})
+					})
+				end
+			end
+			table.sort(filtered, function(a, b)
+				if selectedSort == 'MOST DOWNLOADED' then
+					return a.Downloads > b.Downloads
+				elseif selectedSort == 'NEWEST' then
+					return a.Created > b.Created
+				end
+				return a.Likes > b.Likes
+			end)
+
+			if #filtered == 0 then
+				local empty = Instance.new('TextLabel')
+				empty.Name = 'Empty'
+				empty.Size = UDim2.fromOffset(470, 30)
+				empty.BackgroundTransparency = 1
+				empty.Text = query == '' and 'No public profiles found.' or 'No profiles match your search.'
+				empty.TextColor3 = standaloneTheme.Muted
+				empty.TextSize = 12
+				empty.FontFace = uipallet.Font
+				empty.Parent = publicList
+				publicList.CanvasSize = UDim2.fromOffset(0, 40)
+				return
+			end
+
+			for _, item in filtered do
+				local card = Instance.new('TextButton')
+				card.Name = safeProfileName(item.Name) ~= '' and safeProfileName(item.Name) or 'PublicProfileCard'
+				card.BackgroundColor3 = standaloneTheme.Card
+				card.BorderSizePixel = 0
+				card.AutoButtonColor = false
+				card.Text = ''
+				card.Parent = publicList
+				addCorner(card, UDim.new(0, 4))
+				local cardStroke = Instance.new('UIStroke')
+				cardStroke.Color = standaloneTheme.Stroke
+				cardStroke.Transparency = 0.45
+				cardStroke.Parent = card
+
+				local cardTitle = Instance.new('TextLabel')
+				cardTitle.Size = UDim2.new(1, -18, 0, 44)
+				cardTitle.Position = UDim2.fromOffset(13, 12)
+				cardTitle.BackgroundTransparency = 1
+				cardTitle.Text = item.Name
+				cardTitle.TextWrapped = true
+				cardTitle.TextXAlignment = Enum.TextXAlignment.Left
+				cardTitle.TextYAlignment = Enum.TextYAlignment.Top
+				cardTitle.TextColor3 = standaloneTheme.Text
+				cardTitle.TextSize = 13
+				cardTitle.FontFace = uipallet.Font
+				cardTitle.Parent = card
+
+				local cardAuthor = Instance.new('TextLabel')
+				cardAuthor.Size = UDim2.new(1, -18, 0, 16)
+				cardAuthor.Position = UDim2.fromOffset(13, 60)
+				cardAuthor.BackgroundTransparency = 1
+				cardAuthor.Text = item.Author
+				cardAuthor.TextXAlignment = Enum.TextXAlignment.Left
+				cardAuthor.TextColor3 = standaloneTheme.MutedDark
+				cardAuthor.TextSize = 11
+				cardAuthor.FontFace = uipallet.Font
+				cardAuthor.Parent = card
+
+				local cardDesc = Instance.new('TextLabel')
+				cardDesc.Size = UDim2.new(1, -18, 0, 30)
+				cardDesc.Position = UDim2.fromOffset(13, 80)
+				cardDesc.BackgroundTransparency = 1
+				cardDesc.Text = item.Description
+				cardDesc.TextWrapped = true
+				cardDesc.TextXAlignment = Enum.TextXAlignment.Left
+				cardDesc.TextYAlignment = Enum.TextYAlignment.Top
+				cardDesc.TextColor3 = standaloneTheme.Muted
+				cardDesc.TextSize = 10
+				cardDesc.FontFace = uipallet.Font
+				cardDesc.Parent = card
+
+				local likeBadge = Instance.new('Frame')
+				likeBadge.Size = UDim2.fromOffset(54, 18)
+				likeBadge.Position = UDim2.fromOffset(13, 112)
+				likeBadge.BackgroundColor3 = standaloneTheme.Badge
+				likeBadge.BorderSizePixel = 0
+				likeBadge.Parent = card
+				addCorner(likeBadge, UDim.new(1, 0))
+				local likeIcon = Instance.new('ImageLabel')
+				likeIcon.Size = UDim2.fromOffset(11, 11)
+				likeIcon.Position = UDim2.fromOffset(9, 4)
+				likeIcon.BackgroundTransparency = 1
+				likeIcon.Image = getcustomasset('vape/assets/new/allowedicon.png')
+				likeIcon.ImageColor3 = standaloneTheme.Muted
+				likeIcon.Parent = likeBadge
+				local likeText = Instance.new('TextLabel')
+				likeText.Size = UDim2.new(1, -24, 1, 0)
+				likeText.Position = UDim2.fromOffset(23, 0)
+				likeText.BackgroundTransparency = 1
+				likeText.Text = tostring(item.Likes)
+				likeText.TextXAlignment = Enum.TextXAlignment.Left
+				likeText.TextColor3 = standaloneTheme.Muted
+				likeText.TextSize = 10
+				likeText.FontFace = uipallet.FontSemiBold
+				likeText.Parent = likeBadge
 
 				local import = Instance.new('TextButton')
 				import.Name = 'Import'
-				import.Size = UDim2.fromOffset(58, 26)
-				import.Position = UDim2.new(1, -67, 0, 13)
-				import.BackgroundColor3 = categorysettings.Color
+				import.Size = UDim2.fromOffset(56, 20)
+				import.Position = UDim2.new(1, -69, 1, -28)
+				import.BackgroundColor3 = publicAccent()
 				import.BorderSizePixel = 0
 				import.AutoButtonColor = false
 				import.Text = 'IMPORT'
-				import.TextColor3 = Color3.fromRGB(245, 245, 245)
+				import.TextColor3 = Color3.fromRGB(244, 244, 246)
 				import.TextSize = 10
 				import.FontFace = uipallet.FontSemiBold
-				import.Parent = row
-				addCorner(import, UDim.new(0, 3))
+				import.Parent = card
+				addCorner(import, UDim.new(0, 4))
 
-				row.MouseEnter:Connect(function()
-					tween:Tween(row, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(28, 28, 31)})
+				card.MouseEnter:Connect(function()
+					tween:Tween(card, uipallet.Tween, {BackgroundColor3 = standaloneTheme.CardHover})
 				end)
-				row.MouseLeave:Connect(function()
-					tween:Tween(row, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(22, 22, 24)})
+				card.MouseLeave:Connect(function()
+					tween:Tween(card, uipallet.Tween, {BackgroundColor3 = standaloneTheme.Card})
 				end)
-				import.MouseButton1Click:Connect(function()
-					descLabel.Text = 'Importing...'
-					importPublicProfile(entry, descLabel)
-				end)
-				row.MouseButton1Click:Connect(function()
-					descLabel.Text = 'Importing...'
-					importPublicProfile(entry, descLabel)
-				end)
+				local function doImport()
+					cardDesc.Text = 'Importing...'
+					importPublicProfile(item.Raw, cardDesc)
+				end
+				import.MouseButton1Click:Connect(doImport)
+				card.MouseButton1Click:Connect(doImport)
 			end
-
-			if shown == 0 then
-				createStatusRow(query == '' and 'No public profiles found.' or 'No profiles match your search.')
-			else
-				publicList.CanvasSize = UDim2.fromOffset(0, publicLayout.AbsoluteContentSize.Y / scale.Scale + 7)
-			end
+			publicList.CanvasSize = UDim2.fromOffset(0, publicLayout.AbsoluteContentSize.Y / scale.Scale + 8)
 		end
 
 		local function fetchPublicProfiles()
-			createStatusRow('Loading public profiles...')
+			clearContainer(publicList, publicLayout)
 			local decoded
-			local usedApi = publicProfilesApi
 			for _, apiUrl in publicProfilesApis do
 				local ok, result = pcall(function()
 					return game:HttpGet(apiUrl, true)
@@ -5158,25 +5419,44 @@ function mainapi:CreateCategoryList(categorysettings)
 					end)
 					if decodedOk and type(decodedResult) == 'table' then
 						decoded = decodedResult
-						usedApi = apiUrl
 						break
 					end
 				end
 			end
 			if not decoded then
-				createStatusRow('Could not load public profiles JSON.')
+				local fail = Instance.new('TextLabel')
+				fail.Size = UDim2.fromOffset(470, 30)
+				fail.BackgroundTransparency = 1
+				fail.Text = 'Could not load public profiles JSON.'
+				fail.TextColor3 = standaloneTheme.Muted
+				fail.TextSize = 12
+				fail.FontFace = uipallet.Font
+				fail.Parent = publicList
+				publicList.CanvasSize = UDim2.fromOffset(0, 40)
 				return
 			end
-			apiLabel.Text = usedApi:gsub('https://', ''):gsub('http://', '')
 			loadedPublicProfiles = normalizePublicProfiles(decoded)
 			renderPublicProfiles()
 		end
 
-		publicLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-			publicList.CanvasSize = UDim2.fromOffset(0, publicLayout.AbsoluteContentSize.Y / scale.Scale + 7)
+		createNew.MouseEnter:Connect(function()
+			tween:Tween(createNew, uipallet.Tween, {BackgroundColor3 = color.Light(publicAccent(), 0.04)})
+		end)
+		createNew.MouseLeave:Connect(function()
+			tween:Tween(createNew, uipallet.Tween, {BackgroundColor3 = publicAccent()})
+		end)
+		createNew.MouseButton1Click:Connect(function()
+			publicWindow.Visible = false
+			addvalue:CaptureFocus()
 		end)
 		searchBox:GetPropertyChangedSignal('Text'):Connect(function()
 			renderPublicProfiles()
+		end)
+		yourLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			yourList.CanvasSize = UDim2.fromOffset(0, yourLayout.AbsoluteContentSize.Y / scale.Scale + 4)
+		end)
+		publicLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			publicList.CanvasSize = UDim2.fromOffset(0, publicLayout.AbsoluteContentSize.Y / scale.Scale + 8)
 		end)
 		publicbutton.MouseEnter:Connect(function()
 			tween:Tween(publicbutton, uipallet.Tween, {BackgroundColor3 = Color3.fromRGB(29, 29, 32)})
@@ -5187,10 +5467,17 @@ function mainapi:CreateCategoryList(categorysettings)
 		publicbutton.MouseButton1Click:Connect(function()
 			publicWindow.Visible = not publicWindow.Visible
 			if publicWindow.Visible then
-				publicWindow.Position = UDim2.fromOffset(window.Position.X.Offset + 230, window.Position.Y.Offset)
+				for name, obj in sortButtons do
+					local active = name == selectedSort
+					obj.BackgroundTransparency = active and 0 or 1
+					obj.BackgroundColor3 = active and publicAccent() or Color3.fromRGB(0, 0, 0)
+					obj.TextColor3 = active and Color3.fromRGB(244, 244, 246) or standaloneTheme.MutedDark
+				end
+				refreshYourProfiles()
 				fetchPublicProfiles()
 			end
 		end)
+	end
 	end
 	addbutton.MouseEnter:Connect(function()
 		addbutton.ImageTransparency = 0
