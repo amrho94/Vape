@@ -1922,7 +1922,7 @@ components = {
 				object.AutoButtonColor = false
 				object.Text = ''
 				object.Parent = window
-				addCorner(object, UDim.new(0, categorysettings.Profiles and 3 or 5))
+				addCorner(object, UDim.new(0, 5))
 				local objectbkg = Instance.new('Frame')
 				objectbkg.Name = 'BKG'
 				objectbkg.Size = UDim2.new(1, -2, 1, -2)
