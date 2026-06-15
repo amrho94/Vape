@@ -461,7 +461,14 @@ do
 			tab[obj] = nil
 		end
 
-		if obj.Parent and obj.Visible then
+		-- UIStroke / UIGradient / other UI instances do NOT have .Visible.
+		-- Only GuiObjects should be visibility-checked before tweening.
+		local canTween = obj and obj.Parent
+		if canTween and typeof(obj) == 'Instance' and obj:IsA('GuiObject') then
+			canTween = obj.Visible
+		end
+
+		if canTween then
 			tab[obj] = tweenService:Create(obj, tweeninfo, goal)
 			tab[obj].Completed:Once(function()
 				if tab then
