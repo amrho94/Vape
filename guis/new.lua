@@ -5478,7 +5478,6 @@ function mainapi:CreateCategoryList(categorysettings)
 			end
 		end)
 	end
-	end
 	addbutton.MouseEnter:Connect(function()
 		addbutton.ImageTransparency = 0
 	end)
