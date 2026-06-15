@@ -6943,9 +6943,14 @@ end))
 mainapi:Clean(scale:GetPropertyChangedSignal('Scale'):Connect(function()
 	scaledgui.Size = UDim2.fromScale(1 / scale.Scale, 1 / scale.Scale)
 	for _, v in scaledgui:GetDescendants() do
-		if v:IsA('GuiObject') and v.Visible then
-			v.Visible = false
-			v.Visible = true
+		-- Only GuiObjects have Visible. UIStroke/UIGradient/etc. can live inside the GUI too,
+		-- so never index Visible unless the object is definitely a GuiObject.
+		if v:IsA('GuiObject') then
+			local wasVisible = v.Visible
+			if wasVisible then
+				v.Visible = false
+				v.Visible = true
+			end
 		end
 	end
 end))
